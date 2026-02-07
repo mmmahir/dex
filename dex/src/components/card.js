@@ -3,22 +3,26 @@ import { Text, View ,StyleSheet ,Image} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Card = ({
-    params,
+    name,
+    description,
+    attack,
+    defense,
+    image
 }) => (
     <View style={styles.card}>
         <View>
-            <Image source={require("../../assets/F-15.jpg")} style={styles.cardImage} />
+            <Image source={image} style={styles.cardImage} />
         </View>
         <View>
-            <Text style={styles.nameStyle}>F-15</Text>
+            <Text style={styles.nameStyle}>{name}</Text>
         </View>
         <View>
-            <Text style={styles.descriptionStyle}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent condimentum mauris sed augue iaculis, et malesuada velit congue. Maecenas blandit suscipit laoreet.  </Text>
+            <Text style={styles.descriptionStyle}>{description}</Text>
         </View>
         <View style={styles.stats}>
                 
-                <Text style={styles.statsText}> <MaterialCommunityIcons name="sword-cross" size={16} color={"#000"} /> 100</Text>
-                <Text style={styles.statsText}> <MaterialCommunityIcons name="shield" size={16} color={"#000"} /> 100</Text>
+                <Text style={styles.statsText}> <MaterialCommunityIcons name="sword-cross" size={16} color={"#000"} />{attack}</Text>
+                <Text style={styles.statsText}> <MaterialCommunityIcons name="shield" size={16} color={"#000"} />{defense}</Text>
 
         </View>
     </View>
@@ -26,30 +30,30 @@ const Card = ({
 
 const styles = StyleSheet.create({
     card:{
-        width:200,
-        height:300,
+        width:180,
+        height:250,
         backgroundColor:"#ca8f0f",
         borderRadius:10,
-
         alignItems:"center",
-        margin :20,
+        margin :7,
         marginTop:100,
     },
     cardImage:{
-        width:170,
-        height:120,
+        width:150,
+        height:90,
         borderRadius:10,
         marginTop:20,
     },
     nameStyle:{
-        fontSize:20,
+        fontSize:16,
         fontWeight:"bold",
         marginTop:2, 
     },
     descriptionStyle:{
-        fontSize:8,
+        fontSize:7,
         paddingLeft:10,
         paddingRight:10,
+        height:60,
 
     },
     stats:{
