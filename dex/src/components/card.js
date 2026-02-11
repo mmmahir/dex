@@ -2,6 +2,9 @@ import React from 'react';
 import { Text, View ,StyleSheet ,Image} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+// Helper function to get image from JSON path
+
+
 const Card = ({
     name,
     description,
@@ -11,7 +14,7 @@ const Card = ({
 }) => (
     <View style={styles.card}>
         <View>
-            <Image source={image} style={styles.cardImage} />
+                <Image source={{ uri: image }} style={styles.cardImage} />
         </View>
         <View>
             <Text style={styles.nameStyle}>{name}</Text>

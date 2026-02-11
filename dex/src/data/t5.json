@@ -1,0 +1,80 @@
+[
+    {
+        "id":1,
+        "name":"I-16",
+        "description":"Enemies have a 20% chance of missing their attack",
+        "attack":100,
+        "defense":200,
+        "image":"https://i.pinimg.com/1200x/fe/7e/05/fe7e05741d2f30fa869732f8f2c729d8.jpg",
+        "guess1":"I-16",
+        "guess2":"I-16",
+        "guess3":"I 16",
+        "DEXid":"#5001",
+        "tier":1
+    },
+    {
+        "id":2,
+        "name":"Po-2",
+        "description":"cant attack for 3 rounds because it arrives 3 rounds late",
+        "attack":100,
+        "defense":200,
+        "image":"https://i.pinimg.com/736x/a0/92/19/a09219444fd4bb30a13116b263eb9894.jpg",
+        "guess1":"Po-2",
+        "guess2":"U-2",
+        "guess3":"Polikarpov",
+        "DEXid":"#5002",
+        "tier":1
+    },
+    {
+        "id":3,
+        "name":"Su-2 (M-82)",
+        "description":"Will instantly be destroyed if attacked by Axis aircraft",
+        "attack":110,
+        "defense":100,
+        "image":"https://finescale.com/~/media/images/products-and-reviews/kit-reviews/2010-2014/may-2014/fsm-wb0514_zveda_su2_01.jpg",
+        "guess1":"Su-2",
+        "guess2":"Su 2",
+        "guess3":"M-82",
+        "DEXid":"#5003",
+        "tier":1
+    },
+    {
+        "id":4,
+        "name":"P-36A",
+        "description":"100% boost in stats if there is a french plane on ur team",
+        "attack":90,
+        "defense":150,
+        "image":"https://i.pinimg.com/736x/19/30/19/193019e1787afbcea5dab25b6a2fda51.jpg",
+        "guess1":"P-36",
+        "guess2":"P-36A",
+        "guess3":"P 36",
+        "DEXid":"#5004",
+        "tier":1
+    },
+        {
+        "id":5,
+        "name":"F2A",
+        "description":"Will gain 10% stats if attacked by japanese planes",
+        "attack":110,
+        "defense":150,
+        "image":"https://i.pinimg.com/736x/67/b2/a8/67b2a8e2940be6e0e87e40374d8c4e31.jpg",
+        "guess1":"F2A",
+        "guess2":"F-2A",
+        "guess3":"M-82",
+        "DEXid":"#5005",
+        "tier":1
+    },
+        {
+        "id":6,
+        "name":"A-36",
+        "description":"Will boost P-51's by 20% if on the same team",
+        "attack":110,
+        "defense":150,
+        "image":"https://i.pinimg.com/1200x/03/a6/96/03a6966ce4003ee0eb9e0c4a2dc48fd2.jpg",
+        "guess1":"A-36",
+        "guess2":"A-36A",
+        "guess3":"P-51",
+        "DEXid":"#5006",
+        "tier":1
+    }
+]

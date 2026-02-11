@@ -1,0 +1,38 @@
+[
+    {
+        "id":1,
+        "name":"F-15",
+        "description":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mattis tincidunt lectus, ultrices aliquam dui pellentesque a. Praesent in suscipit nibh, ut pellentesque ipsum.",
+        "attack":100,
+        "defense":100,
+        "image":"https://i.pinimg.com/1200x/9b/76/5b/9b765b5e4ace86a95e626d9856027dd1.jpg",
+        "guess1":"F-15",
+        "guess2":"F-15 Eagle",
+        "guess3":"Strike Eagle",
+        "DEXid":"#1001"
+    },
+        {
+        "id":2,
+        "name":"F-16",
+        "description":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mattis tincidunt lectus, ultrices aliquam dui pellentesque a. Praesent in suscipit nibh, ut pellentesque ipsum.",
+        "attack":90,
+        "defense":80,
+        "image":"https://i.pinimg.com/736x/b8/d6/88/b8d688f976841894e4caa9f0bbd19266.jpg",
+        "guess1":"F-16",
+        "guess2":"F-16 Falcon",
+        "guess3":"F-16 Fighting Falcon",
+        "DEXid":"#1002"
+    },
+        {
+        "id":3,
+        "name":"F-22",
+        "description":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mattis tincidunt lectus, ultrices aliquam dui pellentesque a. Praesent in suscipit nibh, ut pellentesque ipsum.",
+        "attack":95,
+        "defense":90,
+        "image":"https://i.pinimg.com/1200x/ea/4a/2e/ea4a2ec16dd1a68fb7259bb72bd1fca0.jpg",
+        "guess1":"F-22",
+        "guess2":"F-22 Raptor",
+        "guess3":"Raptor",
+        "DEXid":"#1003"
+    }
+]
