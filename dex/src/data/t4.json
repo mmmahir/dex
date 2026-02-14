@@ -1,0 +1,29 @@
+[
+    {
+        "id":1,
+        "name":"I-16 Chung 28",
+        "description":"Deals 30% more damage to japanese planes",
+        "attack":120,
+        "defense":100,
+        "image":"https://i.pinimg.com/736x/1e/fd/48/1efd489996d990b14ec1c8e167ccbe6a.jpg",
+        "guess1":"I-16",
+        "guess2":"I-16 Chung 28",
+        "guess3":"I 16",
+        "DEXid":"#4001",
+        "tier":2
+    },
+    {
+        "id":2,
+        "name":"Ju 87 G-2",
+        "description":"Sirens scare enemy planes, reducing their attack by 20% for 2 turns",
+        "attack":200,
+        "defense":300,
+        "image":"https://i.pinimg.com/1200x/60/c6/4e/60c64ee0072a7b1e37d6139cda174745.jpg",
+        "guess1":"Ju-87",
+        "guess2":"Ju 87 G-2",
+        "guess3":"Ju 87",
+        "DEXid":"#4002",
+        "tier":2
+    }
+    
+]

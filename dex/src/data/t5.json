@@ -102,5 +102,57 @@
         "guess3":"Re-2000",
         "DEXid":"#5008",
         "tier":1
+    },
+        {
+        "id":9,
+        "name":"Bf 109 B-1",
+        "description":"Boosts frendly bf-109s by 20%",
+        "attack":150,
+        "defense":100,
+        "image":"https://i.pinimg.com/1200x/dc/cb/56/dccb56a689dc8e8489179c500757d96f.jpg",
+        "guess1":"Bf 109",
+        "guess2":"Bf-109",
+        "guess3":"Bf 109 B-1",
+        "DEXid":"#5009",
+        "tier":1
+    },
+        {
+        "id":10,
+        "name":"Bf 109 C-1",
+        "description":"Boosts frendly bf-109s by 30%",
+        "attack":150,
+        "defense":100,
+        "image":"https://i.pinimg.com/1200x/66/93/52/6693524bf45890f9fb7c02ee31d1cd64.jpg",
+        "guess1":"Bf 109",
+        "guess2":"Bf-109",
+        "guess3":"Bf 109 C-1",
+        "DEXid":"#5010",
+        "tier":1
+    },
+        {
+        "id":11,
+        "name":"JU 87 G-1",
+        "description":"Sirens scare enemy planes, reducing their attack by 20% for 2 turns",
+        "attack":190,
+        "defense":150,
+        "image":"https://i.pinimg.com/1200x/cb/8c/57/cb8c57bb835ff5255ece51ee12795f42.jpg",
+        "guess1":"JU 87",
+        "guess2":"JU-87",
+        "guess3":"JU 87 G-1",
+        "DEXid":"#5011",
+        "tier":1
+    },
+    {
+        "id":12,
+        "name":"He 100",
+        "description":"Always attacks before enemy planes becouse of its speed, but has a 20% chance of missing its attack",
+        "attack":100,
+        "defense":150,
+        "image":"https://i.pinimg.com/736x/f3/a9/5b/f3a95bedfbd73ff40aa192e7e2d0181d.jpg",
+        "guess1":"He 100",
+        "guess2":"He-100",
+        "guess3":"He 100 D-1",
+        "DEXid":"#5012",
+        "tier":1
     }
 ]

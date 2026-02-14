@@ -64,6 +64,7 @@ export default class Dex extends Component {
           <FlatList
             data={guessedItems}
             keyExtractor={(item, index) => `${item.id}-${index}`}
+            inverted={true}
             renderItem={({ item }) => (
               <View style={styles.cardWrapper}>
                 <Card 
