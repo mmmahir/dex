@@ -76,5 +76,31 @@
         "guess3":"P-51",
         "DEXid":"#5006",
         "tier":1
+    },
+        {
+        "id":7,
+        "name":"A5M4",
+        "description":"Deals 70% more damage to American Navy planes",
+        "attack":100,
+        "defense":150,
+        "image":"https://i.pinimg.com/1200x/e0/3d/b0/e03db07c626713b9cc0e7e0fc6a10737.jpg",
+        "guess1":"A5M4",
+        "guess2":"A5M",
+        "guess3":"A5",
+        "DEXid":"#5007",
+        "tier":1
+    },
+        {
+        "id":8,
+        "name":"Re.2000 serie 1",
+        "description":"Deal 20% more damage to other prop planes but if there is another italian plane on the team it arrives 2 rounds late but with a 50% boost in stats",
+        "attack":150,
+        "defense":100,
+        "image":"https://i.pinimg.com/1200x/1e/7e/18/1e7e187a62c11a9007852f5e3344ef38.jpg",
+        "guess1":"Re.2000",
+        "guess2":"Re.2000 serie 1",
+        "guess3":"Re-2000",
+        "DEXid":"#5008",
+        "tier":1
     }
 ]

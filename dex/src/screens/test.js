@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { View, Text ,StyleSheet ,FlatList,Dimensions, TouchableOpacity,ScrollView} from 'react-native';
+import { View, Text ,StyleSheet ,FlatList,Dimensions, TouchableOpacity,ScrollView, Image, TextInput, Alert} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Card from '../components/card';
 import data1 from '../data/t1.json';
 import data5 from '../data/t5.json';
@@ -16,16 +17,100 @@ export default class test extends Component {
       planes5: data5,
       // sources is an array of data sources with weights; add more entries to support more datasets
       sources: [
-        { items: data1, weight: 0.3, keyPrefix: 'd1' },
-        { items: data5, weight: 0.7, keyPrefix: 'd5' },
+        { items: data1, weight: 0.05, keyPrefix: 'd1' },
+        { items: data5, weight: 0.9, keyPrefix: 'd5' },
       ],
       mixedPlanes: [],
       selectedItem: null,
+      userGuess: '',
+      correctGuesses: [],
+      isCorrect: false,
+      feedbackMessage: '',
     };
   }
 
   componentDidMount() {
+    this.loadCorrectGuesses();
     this.generateSingle();
+  }
+
+  loadCorrectGuesses = async () => {
+    try {
+      const saved = await AsyncStorage.getItem('correctGuesses');
+      if (saved) {
+        this.setState({ correctGuesses: JSON.parse(saved) });
+      }
+    } catch (error) {
+      console.error('Error loading correct guesses:', error);
+    }
+  };
+
+  saveCorrectGuess = async (guessedName) => {
+    try {
+      const { correctGuesses } = this.state;
+      const updated = [...correctGuesses, { name: guessedName, timestamp: new Date().toISOString() }];
+      await AsyncStorage.setItem('correctGuesses', JSON.stringify(updated));
+      this.setState({ correctGuesses: updated });
+    } catch (error) {
+      console.error('Error saving correct guess:', error);
+    }
+  };
+
+  getItemByName = (name) => {
+    const allData = [...this.state.planes, ...this.state.planes5];
+    return allData.find(item => 
+      item.name.toLowerCase() === name.toLowerCase() ||
+      item.guess1.toLowerCase() === name.toLowerCase() ||
+      item.guess2.toLowerCase() === name.toLowerCase() ||
+      item.guess3.toLowerCase() === name.toLowerCase()
+    );
+  };
+
+  getGuessedItems = () => {
+    const { correctGuesses } = this.state;
+    return correctGuesses.map(guess => this.getItemByName(guess.name)).filter(item => item);
+  };
+
+  handleGuess = (guessText) => {
+    if (!this.state.selectedItem) return;
+
+    const item = this.state.selectedItem;
+    const userInputLower = guessText.toLowerCase().trim();
+    
+    // Check if guess matches any of the three options or the name
+    const validGuesses = [
+      item.name.toLowerCase(),
+      item.guess1.toLowerCase(),
+      item.guess2.toLowerCase(),
+      item.guess3.toLowerCase(),
+    ];
+
+    if (validGuesses.includes(userInputLower)) {
+      this.setState({ 
+        isCorrect: true, 
+        feedbackMessage: '✓ Correct! Saved permanently!',
+        userGuess: ''
+      });
+      this.saveCorrectGuess(guessText);
+      setTimeout(() => {
+        this.setState({ isCorrect: false, feedbackMessage: '' });
+        this.generateSingle();
+        this.setState({ userGuess: '' });
+      }, 2000);
+    } else {
+      this.setState({ 
+        isCorrect: false, 
+        feedbackMessage: '✗ Incorrect. Try again!',
+        userGuess: ''
+      });
+      setTimeout(() => {
+        this.setState({ feedbackMessage: '' });
+      }, 1500);
+    }
+  };
+
+  handleGuessButton = (guess) => {
+    this.handleGuess(guess);
   }
 
   // Generate a mixed array from configured `sources` using their weights.
@@ -82,38 +167,85 @@ export default class test extends Component {
     this.setState({ selectedItem: Object.assign({}, pick, { _mixedKey: `${chosen.keyPrefix || 's'}-single-${pick.id}` }) });
   };
 
-  renderLightItem = ({ item }) => (
-    <View >
-      <Card name={item.name} description={item.description} attack={item.attack} defense={item.defense} image={item.image} />
-    </View>
-  );
-
-
-
-
-
   render() {
+    const { selectedItem, userGuess, isCorrect, feedbackMessage, correctGuesses } = this.state;
+    const guessedItems = this.getGuessedItems();
+
     return (
-    <ScrollView style={styles.container}>
+      <ScrollView style={styles.container}>
+        {selectedItem ? (
+          <View style={styles.guessGameContainer}>
+            {/* Image Display */}
+            <View style={styles.imageContainer}>
+              <Image 
+                source={{ uri: selectedItem.image }} 
+                style={styles.guessImage} 
+              />
+            </View>
 
+            {/* Input Field */}
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Type your guess..."
+                value={userGuess}
+                onChangeText={(text) => this.setState({ userGuess: text })}
+                onSubmitEditing={() => this.handleGuess(userGuess)}
+              />
+              <TouchableOpacity 
+                style={styles.submitButton}
+                onPress={() => this.handleGuess(userGuess)}
+              >
+                <Text style={styles.submitButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
 
-        {this.state.selectedItem ? (
-          <View>
-            <Card
-              name={this.state.selectedItem.name}
-              description={this.state.selectedItem.description}
-              attack={this.state.selectedItem.attack}
-              defense={this.state.selectedItem.defense}
-              image={this.state.selectedItem.image}
-            />
+            {/* Feedback Message */}
+            {feedbackMessage ? (
+              <Text style={[
+                styles.feedbackText,
+                { color: isCorrect ? '#4CAF50' : '#f44336' }
+              ]}>
+                {feedbackMessage}
+              </Text>
+            ) : null}
+
+            {/* Correct Guesses Count */}
+            <View style={styles.statsContainer}>
+              <Text style={styles.statsText}>Correct Guesses: {correctGuesses.length}</Text>
+            </View>
           </View>
         ) : (
           <Text style={{ textAlign: 'center', margin: 12 }}>No item</Text>
         )}
         <TouchableOpacity style={styles.button} onPress={() => this.generateSingle()}>
-          <Text style={styles.buttonText}>Randomize</Text>
+          <Text style={styles.buttonText}>Next Item</Text>
         </TouchableOpacity>
-    </ScrollView>
+
+        {/* Correctly Guessed Items */}
+        {guessedItems.length > 0 && (
+          <View style={styles.guessedItemsContainer}>
+            <Text style={styles.guessedItemsTitle}>Correctly Guessed:</Text>
+            <FlatList
+              data={guessedItems}
+              keyExtractor={(item, index) => `${item.id}-${index}`}
+              renderItem={({ item }) => (
+                <View style={styles.cardWrapper}>
+                  <Card 
+                    name={item.name} 
+                    description={item.description} 
+                    attack={item.attack} 
+                    defense={item.defense} 
+                    image={item.image} 
+                  />
+                </View>
+              )}
+              numColumns={2}
+              scrollEnabled={false}
+            />
+          </View>
+        )}
+      </ScrollView>
     );
   }
 }
@@ -122,6 +254,94 @@ const styles = StyleSheet.create({
     container:{
         flex:1,
         flexDirection:"column",
+        backgroundColor: '#f5f5f5',
+    },
+    guessGameContainer: {
+      margin: 15,
+      paddingBottom: 20,
+    },
+    imageContainer: {
+      alignItems: 'center',
+      marginBottom: 20,
+      marginTop: 15,
+    },
+    guessImage: {
+      width: 250,
+      height: 200,
+      borderRadius: 10,
+      backgroundColor: '#fff',
+      borderWidth: 2,
+      borderColor: '#ca8f0f',
+    },
+    guessesContainer: {
+      marginBottom: 20,
+    },
+    guessLabel: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: '#333',
+    },
+    guessButton: {
+      backgroundColor: '#ca8f0f',
+      padding: 12,
+      marginVertical: 8,
+      borderRadius: 8,
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: '#b8860b',
+    },
+    guessButtonText: {
+      color: '#fff',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      marginBottom: 15,
+      alignItems: 'center',
+    },
+    input: {
+      flex: 1,
+      borderWidth: 2,
+      borderColor: '#ca8f0f',
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 14,
+      marginRight: 10,
+      backgroundColor: '#fff',
+    },
+    submitButton: {
+      backgroundColor: '#4CAF50',
+      padding: 12,
+      borderRadius: 8,
+      justifyContent: 'center',
+      minWidth: 80,
+      alignItems: 'center',
+    },
+    submitButtonText: {
+      color: '#fff',
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    feedbackText: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginVertical: 10,
+    },
+    statsContainer: {
+      backgroundColor: '#e3f2fd',
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 15,
+      borderLeftWidth: 4,
+      borderLeftColor: '#ca8f0f',
+    },
+    statsText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: '#333',
     },
     button: {
         backgroundColor: '#ca8f0f',
@@ -134,5 +354,20 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
-    }
+    },
+    guessedItemsContainer: {
+      marginTop: 20,
+      paddingHorizontal: 10,
+      paddingBottom: 20,
+    },
+    guessedItemsTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 15,
+      color: '#333',
+    },
+    cardWrapper: {
+      flex: 1,
+      alignItems: 'center',
+    },
 });
