@@ -10,7 +10,7 @@ const numColumns = 2;
 const itemWidth = (screenWidth / numColumns) - 30;
 const AUTO_PLANE_INTERVAL = 30000; // Change this value to adjust interval (in milliseconds)
 
-export default class Test extends Component {
+export default class test extends Component {
   constructor(props) {
     super(props);
     this.state = {

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import test from '../screens/test';
+import Test from '../screens/test';
+import Dex from '../screens/Dex';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
@@ -33,11 +34,20 @@ const MainTabNavigator = ({ }) => {
     >
       <Tab.Screen
         name="Home"
-        component={test}
+        component={Test}
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ focused }) => (
             <MaterialCommunityIcons name="sword-cross" size={focused ? 40 : 28} color={"#FFF"} />
+          )
+        }}/>
+      <Tab.Screen
+        name="DEX"
+        component={Dex}
+        options={{
+          tabBarLabel: 'DEX',
+          tabBarIcon: ({ focused }) => (
+            <MaterialCommunityIcons name="book" size={focused ? 40 : 28} color={"#FFF"} />
           )
         }}/>
     </Tab.Navigator>
