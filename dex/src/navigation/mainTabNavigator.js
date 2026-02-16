@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Test from '../screens/test';
 import Dex from '../screens/Dex';
 import Home from '../screens/Home';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

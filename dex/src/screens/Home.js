@@ -3,23 +3,26 @@ import { View, Text, StyleSheet, FlatList, Dimensions, TouchableOpacity, ScrollV
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Card from '../components/card';
 import data1 from '../data/t1.json';
+import data4 from '../data/t4.json';
 import data5 from '../data/t5.json';
 
 const { width: screenWidth } = Dimensions.get('window');
 const numColumns = 2;
 const itemWidth = (screenWidth / numColumns) - 30;
-const AUTO_PLANE_INTERVAL = 60000; // Change this value to adjust interval (in milliseconds)
+const AUTO_PLANE_INTERVAL = 20000; // Change this value to adjust interval (in milliseconds)
 
 export default class test extends Component {
   constructor(props) {
     super(props);
     this.state = {
       planes: data1,
+      planes4: data4,
       planes5: data5,
       // sources is an array of data sources with weights; add more entries to support more datasets
       sources: [
         { items: data1, weight: 0.05, keyPrefix: 'd1' },
-        { items: data5, weight: 0.9, keyPrefix: 'd5' },
+        { items: data4, weight: 0.15, keyPrefix: 'd4' },
+        { items: data5, weight: 0.8, keyPrefix: 'd5' },
       ],
       mixedPlanes: [],
       selectedItem: null,
@@ -27,14 +30,16 @@ export default class test extends Component {
       correctGuesses: [],
       isCorrect: false,
       feedbackMessage: '',
+      waitingForNext: false,
     };
     this.intervalId = null;
   }
 
   componentDidMount() {
     this.loadCorrectGuesses();
-    this.loadSelectedItem();  // NEW: Load persisted selectedItem
-    this.loadUserState();     // NEW: Load userGuess, etc. (optional)
+    this.loadSelectedItem();
+    this.loadUserState();
+    this.loadWaitingForNext();
     this.checkAndGenerateItem();
     this.startAutoTimer();
   }
@@ -42,6 +47,9 @@ export default class test extends Component {
   componentWillUnmount() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
+    }
+    if (this.remainingTimerId) {
+      clearTimeout(this.remainingTimerId);
     }
   }
 
@@ -54,16 +62,30 @@ export default class test extends Component {
   checkAndGenerateItem = async () => {
     try {
       const lastTimestamp = await AsyncStorage.getItem('lastItemTimestamp');
-      if (lastTimestamp) {
-        const elapsed = Date.now() - parseInt(lastTimestamp);
-        if (elapsed >= AUTO_PLANE_INTERVAL) {
-          this.generateSingle();
-        } else {
-          this.generateSingle();
-        }
-      } else {
+
+      if (!lastTimestamp) {
         this.generateSingle();
+        return;
       }
+
+      const elapsed = Date.now() - parseInt(lastTimestamp);
+      const waiting = await AsyncStorage.getItem('waitingForNext');
+
+      if (elapsed < AUTO_PLANE_INTERVAL) {
+        if (waiting === 'true') {
+          return;
+        }
+        const remaining = AUTO_PLANE_INTERVAL - elapsed;
+        this.remainingTimerId = setTimeout(() => {
+          this.generateSingle();
+          clearInterval(this.intervalId);
+          this.startAutoTimer();
+        }, remaining);
+        return;
+      }
+
+      this.generateSingle();
+
     } catch (error) {
       console.error('Error checking item timestamp:', error);
       this.generateSingle();
@@ -78,7 +100,25 @@ export default class test extends Component {
     }
   };
 
-  // NEW: Persist selectedItem
+  loadWaitingForNext = async () => {
+    try {
+      const waiting = await AsyncStorage.getItem('waitingForNext');
+      if (waiting === 'true') {
+        this.setState({ waitingForNext: true, selectedItem: null });
+      }
+    } catch (error) {
+      console.error('Error loading waitingForNext:', error);
+    }
+  };
+
+  saveWaitingForNext = async (value) => {
+    try {
+      await AsyncStorage.setItem('waitingForNext', value ? 'true' : 'false');
+    } catch (error) {
+      console.error('Error saving waitingForNext:', error);
+    }
+  };
+
   loadSelectedItem = async () => {
     try {
       const saved = await AsyncStorage.getItem('selectedItem');
@@ -98,7 +138,6 @@ export default class test extends Component {
     }
   };
 
-  // NEW: Optional - persist user state for full UX
   loadUserState = async () => {
     try {
       const userGuess = await AsyncStorage.getItem('userGuess');
@@ -134,10 +173,12 @@ export default class test extends Component {
     }
   };
 
-  saveCorrectGuess = async (guessedName) => {
+  saveCorrectGuess = async (item) => {
     try {
       const { correctGuesses } = this.state;
-      const updated = [...correctGuesses, { name: guessedName, timestamp: new Date().toISOString() }];
+      const guessRecord = { name: item.name, DEXid: item.DEXid, timestamp: new Date().toISOString() };
+      console.log('Saving guess:', guessRecord);
+      const updated = [...correctGuesses, guessRecord];
       await AsyncStorage.setItem('correctGuesses', JSON.stringify(updated));
       this.setState({ correctGuesses: updated });
     } catch (error) {
@@ -146,7 +187,7 @@ export default class test extends Component {
   };
 
   getItemByName = (name) => {
-    const allData = [...this.state.planes, ...this.state.planes5];
+    const allData = [...this.state.planes, ...this.state.planes4, ...this.state.planes5];
     return allData.find(item =>
       item.name.toLowerCase() === name.toLowerCase() ||
       item.guess1.toLowerCase() === name.toLowerCase() ||
@@ -159,7 +200,6 @@ export default class test extends Component {
     if (!this.state.selectedItem) return;
     const item = this.state.selectedItem;
     const userInputLower = guessText.toLowerCase().trim();
-    // Check if guess matches any of the three options or the name
     const validGuesses = [
       item.name.toLowerCase(),
       item.guess1.toLowerCase(),
@@ -169,16 +209,19 @@ export default class test extends Component {
     if (validGuesses.includes(userInputLower)) {
       this.setState({
         isCorrect: true,
-        feedbackMessage: '✓ Correct! Saved permanently!',
-        userGuess: ''
+        feedbackMessage: '✓ Correct! Next plane coming soon...',
+        userGuess: '',
       });
-      this.saveCorrectGuess(guessText);
-      // NEW: Clear persisted item after correct guess
+      this.saveCorrectGuess(item);
       AsyncStorage.removeItem('selectedItem');
+      this.saveWaitingForNext(true);
       setTimeout(() => {
-        this.setState({ isCorrect: false, feedbackMessage: '' });
-        this.generateSingle();
-        this.setState({ userGuess: '' });
+        this.setState({
+          isCorrect: false,
+          feedbackMessage: '',
+          selectedItem: null,
+          waitingForNext: true,
+        });
       }, 2000);
     } else {
       this.setState({
@@ -186,7 +229,6 @@ export default class test extends Component {
         feedbackMessage: '✗ Incorrect. Try again!',
         userGuess: ''
       });
-      // NEW: Save user state on incorrect guess
       this.saveUserState();
       setTimeout(() => {
         this.setState({ feedbackMessage: '' });
@@ -198,11 +240,9 @@ export default class test extends Component {
     this.handleGuess(guess);
   };
 
-  // Generate a mixed array from configured `sources` using their weights.
   generateMixed = (size) => {
     const sources = this.state.sources || [];
     if (!sources.length) return this.setState({ mixedPlanes: [] });
-    // normalize weights
     const totalWeight = sources.reduce((s, src) => s + (src.weight || 0), 0) || 1;
     const cumulative = [];
     let c = 0;
@@ -214,7 +254,6 @@ export default class test extends Component {
     const mixed = [];
     for (let i = 0; i < itemsCount; i++) {
       const r = Math.random();
-      // pick source by cumulative weights
       let idx = 0;
       while (idx < cumulative.length && r > cumulative[idx]) idx++;
       const chosen = sources[Math.min(idx, sources.length - 1)];
@@ -226,10 +265,13 @@ export default class test extends Component {
     this.setState({ mixedPlanes: mixed });
   };
 
-  // pick a single item using the configured source weights
+  // Pick a single item using configured source weights.
+  // Will re-roll if the candidate shares the same guess1 as the current item,
+  // preventing the same plane "family" (e.g. any Bf 109 variant) from appearing twice in a row.
   generateSingle = () => {
     const sources = this.state.sources || [];
     if (!sources.length) return this.setState({ selectedItem: null });
+
     const totalWeight = sources.reduce((s, src) => s + (src.weight || 0), 0) || 1;
     const cumulative = [];
     let c = 0;
@@ -237,24 +279,56 @@ export default class test extends Component {
       c += (src.weight || 0) / totalWeight;
       cumulative.push(c);
     }
-    const r = Math.random();
-    let idx = 0;
-    while (idx < cumulative.length && r > cumulative[idx]) idx++;
-    const chosen = sources[Math.min(idx, sources.length - 1)];
-    const pool = chosen.items || [];
-    if (!pool.length) return this.setState({ selectedItem: null });
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    this.setState({ selectedItem: Object.assign({}, pick, { _mixedKey: `${chosen.keyPrefix || 's'}-single-${pick.id}` }) }, () => {
-      this.saveItemTimestamp();
-      this.saveSelectedItem(pick);  // NEW: Persist after generating
+
+    const currentGuess1 = this.state.selectedItem?.guess1?.toLowerCase();
+
+    let pick = null;
+    let chosenSource = null;
+    let attempts = 0;
+
+    while (attempts < 10) {
+      const r = Math.random();
+      let idx = 0;
+      while (idx < cumulative.length && r > cumulative[idx]) idx++;
+      const chosen = sources[Math.min(idx, sources.length - 1)];
+      const pool = chosen.items || [];
+      if (!pool.length) break;
+
+      const candidate = pool[Math.floor(Math.random() * pool.length)];
+
+      // Re-roll if candidate is in the same "family" as the current plane
+      // (identified by sharing the same guess1, e.g. "Bf 109")
+      if (currentGuess1 && candidate.guess1?.toLowerCase() === currentGuess1) {
+        attempts++;
+        continue;
+      }
+
+      pick = candidate;
+      chosenSource = chosen;
+      break;
+    }
+
+    if (!pick) return this.setState({ selectedItem: null });
+
+    const selectedItem = Object.assign({}, pick, {
+      _mixedKey: `${chosenSource.keyPrefix || 's'}-single-${pick.id}`,
     });
+
+    this.setState(
+      { selectedItem, waitingForNext: false },
+      () => {
+        this.saveItemTimestamp();
+        this.saveSelectedItem(pick);
+        this.saveWaitingForNext(false);
+      }
+    );
   };
 
   render() {
-    const { selectedItem, userGuess, isCorrect, feedbackMessage } = this.state;
+    const { selectedItem, userGuess, isCorrect, feedbackMessage, waitingForNext } = this.state;
     return (
       <ScrollView style={styles.container}>
-        {selectedItem ? (
+        {selectedItem && !waitingForNext ? (
           <View style={styles.guessGameContainer}>
             {/* Image Display */}
             <View style={styles.imageContainer}>
@@ -281,7 +355,18 @@ export default class test extends Component {
             ) : null}
           </View>
         ) : (
-          <Text style={{ textAlign: 'center', margin: 12 }}>No item</Text>
+          <View style={styles.emptyContainer}>
+            {feedbackMessage ? (
+              <Text style={[styles.feedbackText, { color: '#4CAF50', marginBottom: 20 }]}>
+                {feedbackMessage}
+              </Text>
+            ) : null}
+            <Text style={styles.emptyIcon}>✈️</Text>
+            <Text style={styles.emptyTitle}>No plane for now!</Text>
+            <Text style={styles.emptySubtitle}>
+              A new plane will appear{'\n'}once the timer is up.
+            </Text>
+          </View>
         )}
       </ScrollView>
     );
@@ -296,6 +381,7 @@ const styles = StyleSheet.create({
   },
   guessGameContainer: {
     margin: 15,
+    marginTop: 100,
     paddingBottom: 20,
   },
   imageContainer: {
@@ -379,5 +465,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 120,
+    paddingHorizontal: 30,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: '#888',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });
