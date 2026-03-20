@@ -1,28 +1,35 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Dimensions, TouchableOpacity, ScrollView, Image, TextInput, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ScreenCapture from 'expo-screen-capture';
 import Card from '../components/card';
 import data1 from '../data/t1.json';
 import data4 from '../data/t4.json';
 import data5 from '../data/t5.json';
+import data3 from '../data/t3.json';
+import data2 from '../data/t2.json';
 
 const { width: screenWidth } = Dimensions.get('window');
 const numColumns = 2;
 const itemWidth = (screenWidth / numColumns) - 30;
-const AUTO_PLANE_INTERVAL = 20000; // Change this value to adjust interval (in milliseconds)
+const AUTO_PLANE_INTERVAL = 2100000; // Change this value to adjust interval (in milliseconds)
 
-export default class test extends Component {
+class HomeClass extends Component {
   constructor(props) {
     super(props);
     this.state = {
       planes: data1,
       planes4: data4,
       planes5: data5,
+      planes3: data3,
+      planes2: data2,
       // sources is an array of data sources with weights; add more entries to support more datasets
       sources: [
         { items: data1, weight: 0.05, keyPrefix: 'd1' },
         { items: data4, weight: 0.15, keyPrefix: 'd4' },
-        { items: data5, weight: 0.8, keyPrefix: 'd5' },
+        { items: data5, weight: 0.7, keyPrefix: 'd5' },
+        { items: data3, weight: 0.1, keyPrefix: 'd3' },
+        { items: data2, weight: 0.1, keyPrefix: 'd2' },
       ],
       mixedPlanes: [],
       selectedItem: null,
@@ -35,6 +42,7 @@ export default class test extends Component {
     this.intervalId = null;
   }
 
+
   componentDidMount() {
     this.loadCorrectGuesses();
     this.loadSelectedItem();
@@ -42,6 +50,10 @@ export default class test extends Component {
     this.loadWaitingForNext();
     this.checkAndGenerateItem();
     this.startAutoTimer();
+    // Add listener to reload when screen comes into focus
+    this.focusListener = this.props.navigation?.addListener('focus', () => {
+      this.loadCorrectGuesses();
+    });
   }
 
   componentWillUnmount() {
@@ -50,6 +62,9 @@ export default class test extends Component {
     }
     if (this.remainingTimerId) {
       clearTimeout(this.remainingTimerId);
+    }
+    if (this.focusListener) {
+      this.focusListener();
     }
   }
 
@@ -167,6 +182,9 @@ export default class test extends Component {
       const saved = await AsyncStorage.getItem('correctGuesses');
       if (saved) {
         this.setState({ correctGuesses: JSON.parse(saved) });
+      } else {
+        // If no saved data, clear the state
+        this.setState({ correctGuesses: [] });
       }
     } catch (error) {
       console.error('Error loading correct guesses:', error);
@@ -175,10 +193,12 @@ export default class test extends Component {
 
   saveCorrectGuess = async (item) => {
     try {
-      const { correctGuesses } = this.state;
+      // Always reload from AsyncStorage first to get the latest data
+      const saved = await AsyncStorage.getItem('correctGuesses');
+      const currentGuesses = saved ? JSON.parse(saved) : [];
+      
       const guessRecord = { name: item.name, DEXid: item.DEXid, timestamp: new Date().toISOString() };
-      console.log('Saving guess:', guessRecord);
-      const updated = [...correctGuesses, guessRecord];
+      const updated = [...currentGuesses, guessRecord];
       await AsyncStorage.setItem('correctGuesses', JSON.stringify(updated));
       this.setState({ correctGuesses: updated });
     } catch (error) {
@@ -326,6 +346,7 @@ export default class test extends Component {
 
   render() {
     const { selectedItem, userGuess, isCorrect, feedbackMessage, waitingForNext } = this.state;
+    
     return (
       <ScrollView style={styles.container}>
         {selectedItem && !waitingForNext ? (
@@ -373,6 +394,32 @@ export default class test extends Component {
   }
 }
 
+export default function Home(props) {
+  useEffect(() => {
+    // Enable immediately on first mount
+    ScreenCapture.preventScreenCaptureAsync();
+
+    // Re-enable when navigating back to this screen
+    const unsubscribeFocus = props.navigation?.addListener('focus', () => {
+      ScreenCapture.preventScreenCaptureAsync();
+    });
+
+    // Disable when leaving this screen
+    const unsubscribeBlur = props.navigation?.addListener('blur', () => {
+      ScreenCapture.allowScreenCaptureAsync();
+    });
+
+    // Disable when component unmounts
+    return () => {
+      unsubscribeFocus?.();
+      unsubscribeBlur?.();
+      ScreenCapture.allowScreenCaptureAsync();
+    };
+  }, [props.navigation]);
+
+  return <HomeClass {...props} />;
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -391,7 +438,7 @@ const styles = StyleSheet.create({
   },
   guessImage: {
     width: 340,
-    height: 220,
+    height: 180,
     borderRadius: 10,
     backgroundColor: '#fff',
     borderWidth: 2,

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "dex",
+    "name": "Jet Dex",
     "slug": "dex",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.mmmahir.dex"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,6 +29,17 @@
     "plugins": [
       "expo-asset",
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7098a8ee-eedc-4913-9cb2-8397048be521"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7098a8ee-eedc-4913-9cb2-8397048be521"
+    }
   }
 }

@@ -70,7 +70,7 @@
         "description":"Will boost P-51's by 20% if on the same team",
         "attack":110,
         "defense":150,
-        "image":"https://i.pinimg.com/1200x/03/a6/96/03a6966ce4003ee0eb9e0c4a2dc48fd2.jpg",
+        "image":"https://i.pinimg.com/1200x/6a/79/fa/6a79fa1c5cc758ca6ee087b860efc4f2.jpg",
         "guess1":"A-36",
         "guess2":"A-36A",
         "guess3":"P-51",
@@ -153,6 +153,32 @@
         "guess2":"He-100",
         "guess3":"He 100 D-1",
         "DEXid":"#5012",
+        "tier":1
+    },
+    {
+        "id":13,
+        "name":"Su-2 MV-5",
+        "description":"Will instantly be destroyed if attacked by Axis aircraft",
+        "attack":130,
+        "defense":200,
+        "image":"https://i.pinimg.com/1200x/62/1c/3a/621c3aed0f21830b4eb72583789f69a6.jpg",
+        "guess1":"Su-2 MV-5",
+        "guess2":"Su-2",
+        "guess3":"Su 2",
+        "DEXid":"#5013",
+        "tier":1
+    },
+    {
+        "id":14,
+        "name":"He 112 B-0",
+        "description":"Will debuff enemy team by 10% if there is another german plane on the team",
+        "attack":100,
+        "defense":150,
+        "image":"https://i.pinimg.com/736x/39/27/68/3927684794441e8a0fd6246b70ae1218.jpg",
+        "guess1":"He 112 B-0",
+        "guess2":"He-112",
+        "guess3":"He 112",
+        "DEXid":"#5014",
         "tier":1
     }
 ]

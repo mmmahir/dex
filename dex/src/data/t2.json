@@ -1,0 +1,38 @@
+[
+    {
+        "id":1,
+        "name":"MiG-17A",
+        "description":"Deals 30% more to f-4s and f-105s",
+        "attack":500,
+        "defense":1000,
+        "image":"https://i.pinimg.com/736x/e5/bd/64/e5bd64e61213cd74f3c430d1622dffcf.jpg",
+        "guess1":"MiG-17A",
+        "guess2":"MiG 17",
+        "guess3":"Mig-17",
+        "DEXid":"#2001"
+    },
+        {
+        "id":2,
+        "name":"F-4C",
+        "description":"Deals 50% more damage to russain planes",
+        "attack":550,
+        "defense":1000,
+        "image":"https://i.pinimg.com/1200x/55/72/f0/5572f0330a1c33c6ec80f8e24cc13536.jpg",
+        "guess1":"F-4C",
+        "guess2":"F-4",
+        "guess3":"F 4",
+        "DEXid":"#2002"
+    },
+        {
+        "id":3,
+        "name":"Alpha Jet A",
+        "description":"Buff all friendly french and german planes by 20%",
+        "attack":500,
+        "defense":1000,
+        "image":"https://i.pinimg.com/1200x/19/cf/4f/19cf4fd3dfefb58208cbe009331977df.jpg",
+        "guess1":"Alpha Jet A",
+        "guess2":"Alpha Jet",
+        "guess3":"AlphaJet",
+        "DEXid":"#2003"
+    }
+]

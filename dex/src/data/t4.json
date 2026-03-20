@@ -24,6 +24,58 @@
         "guess3":"Ju 87",
         "DEXid":"#4002",
         "tier":2
+    },
+    {
+        "id":3,
+        "name":"Yak-9",
+        "description":"Deals 30% more damage to all bf 109 variants",
+        "attack":200,
+        "defense":300,
+        "image":"https://i.pinimg.com/1200x/60/c6/4e/60c64ee0072a7b1e37d6139cda174745.jpg",
+        "guess1":"Yak-9",
+        "guess2":"Yak 9",
+        "guess3":"Yak",
+        "DEXid":"#4003",
+        "tier":2
+    },
+    {
+        "id":4,
+        "name":"P-51D-30",
+        "description":"Deals 30% more damage to axis planes",
+        "attack":200,
+        "defense":300,
+        "image":"https://i.pinimg.com/736x/9c/e0/50/9ce0501e2d64b88d94af071cfe41fdf2.jpg",
+        "guess1":"P-51D-30",
+        "guess2":"P 51",
+        "guess3":"P-51",
+        "DEXid":"#4004",
+        "tier":2
+    },
+    {
+        "id":5,
+        "name":"Re.2001 CN",
+        "description":"Deals 30% more damage to spitfires",
+        "attack":200,
+        "defense":300,
+        "image":"https://i.pinimg.com/1200x/06/ce/99/06ce992fc741a4ee76a62f798e4d823a.jpg",
+        "guess1":"Re.2001 CN",
+        "guess2":"Re-2001",
+        "guess3":"Re.2001",
+        "DEXid":"#4005",
+        "tier":2
+    },
+    {
+        "id":6,
+        "name":"Spitfire F Mk IX",
+        "description":"Deals 30% more damage to spitfires",
+        "attack":200,
+        "defense":300,
+        "image":"https://i.pinimg.com/1200x/fc/56/61/fc566196804a15b55806af97fcb936a1.jpg",
+        "guess1":"Spitfire F Mk IX",
+        "guess2":"Spitfire",
+        "guess3":"Spitfire F",
+        "DEXid":"#4006",
+        "tier":2
     }
     
 ]

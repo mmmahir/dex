@@ -5,6 +5,8 @@ import Card from '../components/card';
 import data1 from '../data/t1.json';
 import data4 from '../data/t4.json';
 import data5 from '../data/t5.json';
+import data3 from '../data/t3.json';
+import data2 from '../data/t2.json';
 
 export default class Dex extends Component {
   constructor(props) {
@@ -15,6 +17,8 @@ export default class Dex extends Component {
       planes: data1,
       planes4: data4,
       planes5: data5,
+      planes3: data3,
+      planes2: data2,
     };
   }
 
@@ -37,7 +41,7 @@ export default class Dex extends Component {
   };
 
   getItemByName = (name) => {
-    const allData = [...this.state.planes, ...this.state.planes4, ...this.state.planes5];
+    const allData = [...this.state.planes, ...this.state.planes4, ...this.state.planes5, ...this.state.planes3, ...this.state.planes2];
     return allData.find(item =>
       item.name.toLowerCase() === name.toLowerCase() ||
       item.guess1.toLowerCase() === name.toLowerCase() ||
@@ -47,21 +51,17 @@ export default class Dex extends Component {
   };
 
   getGuessedItems = (guesses) => {
-    const allData = [...this.state.planes, ...this.state.planes4, ...this.state.planes5];
+    const allData = [...this.state.planes, ...this.state.planes4, ...this.state.planes5, ...this.state.planes3, ...this.state.planes2];
     const items = guesses.map(guess => {
-      console.log('Looking up guess:', guess);
       if (guess.DEXid) {
         // Match by DEXid for precise lookup (e.g. distinguishes Bf 109 B-1 from C-1)
-        const found = allData.find(item => item.DEXid === guess.DEXid);
-        console.log('Found by DEXid:', found?.name, found?.DEXid);
-        return found;
+        return allData.find(item => item.DEXid === guess.DEXid);
       }
       // Fallback for old saves that only have name
-      const found = this.getItemByName(guess.name);
-      console.log('Found by name:', found?.name, found?.DEXid);
-      return found;
+      return this.getItemByName(guess.name);
     }).filter(item => item);
-    this.setState({ guessedItems: items });
+    // Reverse so newest guesses appear first (top-left)
+    this.setState({ guessedItems: items.reverse() });
   };
 
   clearData = () => {
@@ -75,6 +75,9 @@ export default class Dex extends Component {
           style: 'destructive',
           onPress: async () => {
             try {
+              // Clear state first
+              this.setState({ correctGuesses: [], guessedItems: [] });
+              // Then clear AsyncStorage
               await AsyncStorage.multiRemove([
                 'correctGuesses',
                 'selectedItem',
@@ -84,7 +87,6 @@ export default class Dex extends Component {
                 'isCorrect',
                 'feedbackMessage',
               ]);
-              this.setState({ correctGuesses: [], guessedItems: [] });
             } catch (error) {
               console.error('Error clearing data:', error);
             }
@@ -110,8 +112,7 @@ export default class Dex extends Component {
         {guessedItems.length > 0 ? (
           <FlatList
             data={guessedItems}
-            keyExtractor={(item, index) => `${item.id}-${index}`}
-            inverted={true}
+            keyExtractor={(item, index) => `${item.DEXid}-${index}`}
             renderItem={({ item }) => (
               <View style={styles.cardWrapper}>
                 <Card
