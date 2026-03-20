@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Card from '../components/card';
 import data1 from '../data/t1.json';
 import data4 from '../data/t4.json';
@@ -8,12 +9,32 @@ import data5 from '../data/t5.json';
 import data3 from '../data/t3.json';
 import data2 from '../data/t2.json';
 
+const getMetrics = () => {
+  const { width } = Dimensions.get('window');
+  return { screenWidth: width };
+};
+
+const getTier = (item) => {
+  if (item.tier) return item.tier;
+  if (!item.DEXid) return 99;
+  return parseInt(item.DEXid.replace('#', '')[0]) || 99;
+};
+
+const SORT_OPTIONS = [
+  { key: 'newest',         label: 'Newest',   icon: 'clock-outline' },
+  { key: 'oldest',         label: 'Oldest',   icon: 'clock-check-outline' },
+  { key: 'rarity',         label: 'Rarity ↑', icon: 'star' },
+  { key: 'rarity_reverse', label: 'Rarity ↓', icon: 'star-outline' },
+  { key: 'name',           label: 'A–Z',      icon: 'sort-alphabetical-ascending' },
+];
+
 export default class Dex extends Component {
   constructor(props) {
     super(props);
     this.state = {
       correctGuesses: [],
       guessedItems: [],
+      sortKey: 'newest',
       planes: data1,
       planes4: data4,
       planes5: data5,
@@ -25,6 +46,11 @@ export default class Dex extends Component {
   componentDidMount() {
     this.loadCorrectGuesses();
     this.props.navigation.addListener('focus', this.loadCorrectGuesses);
+    this.dimensionListener = Dimensions.addEventListener('change', () => { this.forceUpdate(); });
+  }
+
+  componentWillUnmount() {
+    if (this.dimensionListener) this.dimensionListener.remove?.();
   }
 
   loadCorrectGuesses = async () => {
@@ -52,16 +78,48 @@ export default class Dex extends Component {
 
   getGuessedItems = (guesses) => {
     const allData = [...this.state.planes, ...this.state.planes4, ...this.state.planes5, ...this.state.planes3, ...this.state.planes2];
-    const items = guesses.map(guess => {
+    const items = guesses.map((guess, index) => {
+      let item;
       if (guess.DEXid) {
-        // Match by DEXid for precise lookup (e.g. distinguishes Bf 109 B-1 from C-1)
-        return allData.find(item => item.DEXid === guess.DEXid);
+        item = allData.find(i => i.DEXid === guess.DEXid);
+      } else {
+        item = this.getItemByName(guess.name);
       }
-      // Fallback for old saves that only have name
-      return this.getItemByName(guess.name);
-    }).filter(item => item);
-    // Reverse so newest guesses appear first (top-left)
-    this.setState({ guessedItems: items.reverse() });
+      return item ? { ...item, _guessIndex: index } : null;
+    }).filter(Boolean);
+    this.setState({ guessedItems: items });
+  };
+
+  getSortedItems = () => {
+    const { guessedItems, sortKey } = this.state;
+    const items = [...guessedItems];
+    switch (sortKey) {
+      case 'newest':
+        return items.sort((a, b) => b._guessIndex - a._guessIndex);
+      case 'oldest':
+        return items.sort((a, b) => a._guessIndex - b._guessIndex);
+      case 'rarity':
+        return items.sort((a, b) => getTier(a) - getTier(b));
+      case 'rarity_reverse':
+        return items.sort((a, b) => getTier(b) - getTier(a));
+      case 'name':
+        return items.sort((a, b) => a.name.localeCompare(b.name));
+      default:
+        return items;
+    }
+  };
+
+  deleteItem = async (DEXid) => {
+    try {
+      const saved = await AsyncStorage.getItem('correctGuesses');
+      const currentGuesses = saved ? JSON.parse(saved) : [];
+      const updated = currentGuesses.filter(g => g.DEXid !== DEXid);
+      await AsyncStorage.setItem('correctGuesses', JSON.stringify(updated));
+      this.setState({ correctGuesses: updated });
+      this.getGuessedItems(updated);
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
   };
 
   clearData = () => {
@@ -75,17 +133,10 @@ export default class Dex extends Component {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Clear state first
               this.setState({ correctGuesses: [], guessedItems: [] });
-              // Then clear AsyncStorage
               await AsyncStorage.multiRemove([
-                'correctGuesses',
-                'selectedItem',
-                'lastItemTimestamp',
-                'waitingForNext',
-                'userGuess',
-                'isCorrect',
-                'feedbackMessage',
+                'correctGuesses', 'selectedItem', 'lastItemTimestamp',
+                'waitingForNext', 'userGuess', 'isCorrect', 'feedbackMessage',
               ]);
             } catch (error) {
               console.error('Error clearing data:', error);
@@ -97,21 +148,59 @@ export default class Dex extends Component {
   };
 
   render() {
-    const { guessedItems, correctGuesses } = this.state;
+    const { correctGuesses, sortKey } = this.state;
+    const { screenWidth } = getMetrics();
+    const headerTitleSize = Math.max(24, screenWidth * 0.075);
+    const headerSubSize = Math.max(13, screenWidth * 0.038);
+    const sortedItems = this.getSortedItems();
 
     return (
       <ScrollView style={styles.container}>
+        {/* Header */}
         <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>DEX</Text>
-          <Text style={styles.headerSubtitle}>Correctly Guessed: {correctGuesses.length}</Text>
+          <Text style={[styles.headerTitle, { fontSize: headerTitleSize }]}>DEX</Text>
+          <Text style={[styles.headerSubtitle, { fontSize: headerSubSize }]}>
+            Correctly Guessed: {correctGuesses.length}
+          </Text>
           <TouchableOpacity style={styles.clearButton} onPress={this.clearData}>
-            <Text style={styles.clearButtonText}>🗑 Clear Data</Text>
+            <Text style={[styles.clearButtonText, { fontSize: Math.max(12, screenWidth * 0.035) }]}>🗑 Clear Data</Text>
           </TouchableOpacity>
         </View>
 
-        {guessedItems.length > 0 ? (
+        {/* Sort bar */}
+        {sortedItems.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.sortBar}
+            contentContainerStyle={styles.sortBarContent}
+          >
+            {SORT_OPTIONS.map(opt => {
+              const active = sortKey === opt.key;
+              return (
+                <TouchableOpacity
+                  key={opt.key}
+                  style={[styles.sortChip, active && styles.sortChipActive]}
+                  onPress={() => this.setState({ sortKey: opt.key })}
+                >
+                  <MaterialCommunityIcons
+                    name={opt.icon}
+                    size={15}
+                    color={active ? '#fff' : '#ca8f0f'}
+                  />
+                  <Text style={[styles.sortChipText, active && styles.sortChipTextActive]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
+
+        {/* Grid */}
+        {sortedItems.length > 0 ? (
           <FlatList
-            data={guessedItems}
+            data={sortedItems}
             keyExtractor={(item, index) => `${item.DEXid}-${index}`}
             renderItem={({ item }) => (
               <View style={styles.cardWrapper}>
@@ -121,15 +210,21 @@ export default class Dex extends Component {
                   attack={item.attack}
                   defense={item.defense}
                   image={item.image}
+                  DEXid={item.DEXid}
+                  tier={item.tier}
+                  onDelete={this.deleteItem}
                 />
               </View>
             )}
             numColumns={2}
             scrollEnabled={false}
+            contentContainerStyle={styles.flatListContent}
           />
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No items guessed yet. Go guess some items!</Text>
+            <Text style={[styles.emptyText, { fontSize: Math.max(13, screenWidth * 0.040) }]}>
+              No items guessed yet. Go guess some items!
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -144,19 +239,69 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     backgroundColor: '#ca8f0f',
-    padding: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
+    letterSpacing: 3,
   },
   headerSubtitle: {
-    fontSize: 16,
     color: '#fff',
-    marginTop: 8,
+    marginTop: 6,
+  },
+  clearButton: {
+    marginTop: 14,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    paddingHorizontal: 22,
+    paddingVertical: 9,
+    borderRadius: 20,
+  },
+  clearButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  sortBar: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e8e8e8',
+  },
+  sortBarContent: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+    flexDirection: 'row',
+  },
+  sortChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#ca8f0f',
+    backgroundColor: '#fff',
+  },
+  sortChipActive: {
+    backgroundColor: '#ca8f0f',
+    borderColor: '#ca8f0f',
+  },
+  sortChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#ca8f0f',
+  },
+  sortChipTextActive: {
+    color: '#fff',
+  },
+  flatListContent: {
+    paddingHorizontal: 8,
+    paddingTop: 12,
+    paddingBottom: 20,
   },
   cardWrapper: {
     flex: 1,
@@ -166,23 +311,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 50,
+    paddingVertical: 60,
+    paddingHorizontal: 30,
   },
   emptyText: {
-    fontSize: 16,
     color: '#999',
     textAlign: 'center',
-  },
-  clearButton: {
-    marginTop: 14,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  clearButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    lineHeight: 26,
   },
 });

@@ -10,7 +10,7 @@
         "guess2":"I-16 Chung 28",
         "guess3":"I 16",
         "DEXid":"#4001",
-        "tier":2
+        "tier":4
     },
     {
         "id":2,
@@ -23,7 +23,7 @@
         "guess2":"Ju 87 G-2",
         "guess3":"Ju 87",
         "DEXid":"#4002",
-        "tier":2
+        "tier":4
     },
     {
         "id":3,
@@ -36,7 +36,7 @@
         "guess2":"Yak 9",
         "guess3":"Yak",
         "DEXid":"#4003",
-        "tier":2
+        "tier":4
     },
     {
         "id":4,
@@ -49,7 +49,7 @@
         "guess2":"P 51",
         "guess3":"P-51",
         "DEXid":"#4004",
-        "tier":2
+        "tier":4
     },
     {
         "id":5,
@@ -62,7 +62,7 @@
         "guess2":"Re-2001",
         "guess3":"Re.2001",
         "DEXid":"#4005",
-        "tier":2
+        "tier":4
     },
     {
         "id":6,
@@ -75,7 +75,7 @@
         "guess2":"Spitfire",
         "guess3":"Spitfire F",
         "DEXid":"#4006",
-        "tier":2
+        "tier":4
     }
     
 ]

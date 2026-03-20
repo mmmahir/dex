@@ -9,19 +9,21 @@
         "guess1":"MiG-17A",
         "guess2":"MiG 17",
         "guess3":"Mig-17",
-        "DEXid":"#2001"
+        "DEXid":"#2001",
+        "tier":2
     },
         {
         "id":2,
         "name":"F-4C",
         "description":"Deals 50% more damage to russain planes",
         "attack":550,
-        "defense":1000,
+        "defense":670,
         "image":"https://i.pinimg.com/1200x/55/72/f0/5572f0330a1c33c6ec80f8e24cc13536.jpg",
         "guess1":"F-4C",
         "guess2":"F-4",
         "guess3":"F 4",
-        "DEXid":"#2002"
+        "DEXid":"#2002",
+        "tier":2
     },
         {
         "id":3,
@@ -33,6 +35,7 @@
         "guess1":"Alpha Jet A",
         "guess2":"Alpha Jet",
         "guess3":"AlphaJet",
-        "DEXid":"#2003"
+        "DEXid":"#2003",
+        "tier":2
     }
 ]

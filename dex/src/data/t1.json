@@ -9,7 +9,8 @@
         "guess1":"F-15C",
         "guess2":"F-15",
         "guess3":"F 15",
-        "DEXid":"#1001"
+        "DEXid":"#1001",
+        "tier":1
     },
         {
         "id":2,
@@ -21,7 +22,8 @@
         "guess1":"F-16A",
         "guess2":"F-16",
         "guess3":"F 16",
-        "DEXid":"#1002"
+        "DEXid":"#1002",
+        "tier":1
     },
         {
         "id":3,
@@ -33,6 +35,7 @@
         "guess1":"F-22A",
         "guess2":"F-22",
         "guess3":"F 22",
-        "DEXid":"#1003"
+        "DEXid":"#1003",
+        "tier":1
     }
 ]

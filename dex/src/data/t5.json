@@ -10,7 +10,7 @@
         "guess2":"I-16",
         "guess3":"I 16",
         "DEXid":"#5001",
-        "tier":1
+        "tier":5
     },
     {
         "id":2,
@@ -23,7 +23,7 @@
         "guess2":"U-2",
         "guess3":"Polikarpov",
         "DEXid":"#5002",
-        "tier":1
+        "tier":5
     },
     {
         "id":3,
@@ -36,7 +36,7 @@
         "guess2":"Su 2",
         "guess3":"M-82",
         "DEXid":"#5003",
-        "tier":1
+        "tier":5
     },
     {
         "id":4,
@@ -49,7 +49,7 @@
         "guess2":"P-36A",
         "guess3":"P 36",
         "DEXid":"#5004",
-        "tier":1
+        "tier":5
     },
         {
         "id":5,
@@ -62,7 +62,7 @@
         "guess2":"F-2A",
         "guess3":"M-82",
         "DEXid":"#5005",
-        "tier":1
+        "tier":5
     },
         {
         "id":6,
@@ -75,7 +75,7 @@
         "guess2":"A-36A",
         "guess3":"P-51",
         "DEXid":"#5006",
-        "tier":1
+        "tier":5
     },
         {
         "id":7,
@@ -88,7 +88,7 @@
         "guess2":"A5M",
         "guess3":"A5",
         "DEXid":"#5007",
-        "tier":1
+        "tier":5
     },
         {
         "id":8,
@@ -101,7 +101,7 @@
         "guess2":"Re.2000 serie 1",
         "guess3":"Re-2000",
         "DEXid":"#5008",
-        "tier":1
+        "tier":5
     },
         {
         "id":9,
@@ -114,7 +114,7 @@
         "guess2":"Bf-109",
         "guess3":"Bf 109 B-1",
         "DEXid":"#5009",
-        "tier":1
+        "tier":5
     },
         {
         "id":10,
@@ -127,7 +127,7 @@
         "guess2":"Bf-109",
         "guess3":"Bf 109 C-1",
         "DEXid":"#5010",
-        "tier":1
+        "tier":5
     },
         {
         "id":11,
@@ -140,7 +140,7 @@
         "guess2":"JU-87",
         "guess3":"JU 87 G-1",
         "DEXid":"#5011",
-        "tier":1
+        "tier":5
     },
     {
         "id":12,
@@ -153,7 +153,7 @@
         "guess2":"He-100",
         "guess3":"He 100 D-1",
         "DEXid":"#5012",
-        "tier":1
+        "tier":5
     },
     {
         "id":13,
@@ -166,7 +166,7 @@
         "guess2":"Su-2",
         "guess3":"Su 2",
         "DEXid":"#5013",
-        "tier":1
+        "tier":5
     },
     {
         "id":14,
@@ -179,6 +179,6 @@
         "guess2":"He-112",
         "guess3":"He 112",
         "DEXid":"#5014",
-        "tier":1
+        "tier":5
     }
 ]
