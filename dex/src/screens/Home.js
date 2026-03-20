@@ -9,7 +9,7 @@ import data5 from '../data/t5.json';
 import data3 from '../data/t3.json';
 import data2 from '../data/t2.json';
 
-const AUTO_PLANE_INTERVAL = 21000;
+const AUTO_PLANE_INTERVAL = 2100000;
 
 // Responsive helpers — recalculate on each render in case of orientation change
 const getMetrics = () => {
@@ -233,7 +233,7 @@ class HomeClass extends Component {
             {/* Header */}
             <View style={styles.headerBanner}>
               <Text style={[styles.headerBannerText, { fontSize: Math.max(14, screenWidth * 0.042) }]}>
-                ✈️  What plane is this?
+                What plane is this?
               </Text>
             </View>
 
