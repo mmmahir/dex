@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import {
+  View, Text, StyleSheet, FlatList, ScrollView,
+  TouchableOpacity, Alert, Dimensions, Animated, Easing
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Card from '../components/card';
@@ -8,6 +11,9 @@ import data4 from '../data/t4.json';
 import data5 from '../data/t5.json';
 import data3 from '../data/t3.json';
 import data2 from '../data/t2.json';
+
+const ALL_DATA = [...data1, ...data2, ...data3, ...data4, ...data5];
+const TOTAL_PLANES = ALL_DATA.length;
 
 const getMetrics = () => {
   const { width } = Dimensions.get('window');
@@ -21,11 +27,11 @@ const getTier = (item) => {
 };
 
 const SORT_OPTIONS = [
-  { key: 'newest',         label: 'Newest',   icon: 'clock-outline' },
-  { key: 'oldest',         label: 'Oldest',   icon: 'clock-check-outline' },
-  { key: 'rarity',         label: 'Rarity ↑', icon: 'star' },
-  { key: 'rarity_reverse', label: 'Rarity ↓', icon: 'star-outline' },
-  { key: 'name',           label: 'A–Z',      icon: 'sort-alphabetical-ascending' },
+  { key: 'newest',         label: 'NEWEST',   icon: 'clock-outline' },
+  { key: 'oldest',         label: 'OLDEST',   icon: 'clock-check-outline' },
+  { key: 'rarity',         label: 'RARITY ↑', icon: 'star' },
+  { key: 'rarity_reverse', label: 'RARITY ↓', icon: 'star-outline' },
+  { key: 'name',           label: 'A – Z',    icon: 'sort-alphabetical-ascending' },
 ];
 
 export default class Dex extends Component {
@@ -41,6 +47,7 @@ export default class Dex extends Component {
       planes3: data3,
       planes2: data2,
     };
+    this.progressAnim = new Animated.Value(0);
   }
 
   componentDidMount() {
@@ -53,6 +60,15 @@ export default class Dex extends Component {
     if (this.dimensionListener) this.dimensionListener.remove?.();
   }
 
+  animateProgress = (count) => {
+    Animated.timing(this.progressAnim, {
+      toValue: count / TOTAL_PLANES,
+      duration: 800,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  };
+
   loadCorrectGuesses = async () => {
     try {
       const saved = await AsyncStorage.getItem('correctGuesses');
@@ -60,6 +76,9 @@ export default class Dex extends Component {
         const guesses = JSON.parse(saved);
         this.setState({ correctGuesses: guesses });
         this.getGuessedItems(guesses);
+        this.animateProgress(guesses.length);
+      } else {
+        this.animateProgress(0);
       }
     } catch (error) {
       console.error('Error loading correct guesses:', error);
@@ -94,18 +113,12 @@ export default class Dex extends Component {
     const { guessedItems, sortKey } = this.state;
     const items = [...guessedItems];
     switch (sortKey) {
-      case 'newest':
-        return items.sort((a, b) => b._guessIndex - a._guessIndex);
-      case 'oldest':
-        return items.sort((a, b) => a._guessIndex - b._guessIndex);
-      case 'rarity':
-        return items.sort((a, b) => getTier(a) - getTier(b));
-      case 'rarity_reverse':
-        return items.sort((a, b) => getTier(b) - getTier(a));
-      case 'name':
-        return items.sort((a, b) => a.name.localeCompare(b.name));
-      default:
-        return items;
+      case 'newest':        return items.sort((a, b) => b._guessIndex - a._guessIndex);
+      case 'oldest':        return items.sort((a, b) => a._guessIndex - b._guessIndex);
+      case 'rarity':        return items.sort((a, b) => getTier(a) - getTier(b));
+      case 'rarity_reverse':return items.sort((a, b) => getTier(b) - getTier(a));
+      case 'name':          return items.sort((a, b) => a.name.localeCompare(b.name));
+      default:              return items;
     }
   };
 
@@ -117,6 +130,7 @@ export default class Dex extends Component {
       await AsyncStorage.setItem('correctGuesses', JSON.stringify(updated));
       this.setState({ correctGuesses: updated });
       this.getGuessedItems(updated);
+      this.animateProgress(updated.length);
     } catch (error) {
       console.error('Error deleting item:', error);
     }
@@ -124,16 +138,17 @@ export default class Dex extends Component {
 
   clearData = () => {
     Alert.alert(
-      'Clear All Data',
-      'This will delete all your guesses and progress. Are you sure?',
+      'DELETE ALL',
+      'This will delete all confirmed identifications. Are you sure?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'CANCEL', style: 'cancel' },
         {
-          text: 'Clear',
+          text: 'DELETE ALL',
           style: 'destructive',
           onPress: async () => {
             try {
               this.setState({ correctGuesses: [], guessedItems: [] });
+              this.animateProgress(0);
               await AsyncStorage.multiRemove([
                 'correctGuesses', 'selectedItem', 'lastItemTimestamp',
                 'waitingForNext', 'userGuess', 'isCorrect', 'feedbackMessage',
@@ -150,58 +165,96 @@ export default class Dex extends Component {
   render() {
     const { correctGuesses, sortKey } = this.state;
     const { screenWidth } = getMetrics();
-    const headerTitleSize = Math.max(24, screenWidth * 0.075);
-    const headerSubSize = Math.max(13, screenWidth * 0.038);
     const sortedItems = this.getSortedItems();
+    const pct = Math.round((correctGuesses.length / TOTAL_PLANES) * 100);
+
+    const progressWidth = this.progressAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0%', '100%'],
+    });
 
     return (
-      <ScrollView style={styles.container}>
-        {/* Header */}
-        <View style={styles.headerContainer}>
-          <Text style={[styles.headerTitle, { fontSize: headerTitleSize }]}>DEX</Text>
-          <Text style={[styles.headerSubtitle, { fontSize: headerSubSize }]}>
-            Correctly Guessed: {correctGuesses.length}
-          </Text>
-          <TouchableOpacity style={styles.clearButton} onPress={this.clearData}>
-            <Text style={[styles.clearButtonText, { fontSize: Math.max(12, screenWidth * 0.035) }]}>🗑 Clear Data</Text>
-          </TouchableOpacity>
+      <View style={styles.root}>
+
+        {/* ── HUD Header ── */}
+        <View style={styles.hud}>
+          <View style={styles.hudTop}>
+            <View style={styles.hudTitleRow}>
+              <MaterialCommunityIcons name="book-open-variant" size={18} color="#ca8f0f" />
+              <Text style={styles.hudTitle}>DEX</Text>
+            </View>
+            <TouchableOpacity style={styles.purgeBtn} onPress={this.clearData}>
+              <MaterialCommunityIcons name="trash-can-outline" size={14} color="#f44336" />
+              <Text style={styles.purgeBtnText}>DELETE ALL</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Stats row */}
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>{correctGuesses.length}</Text>
+              <Text style={styles.statLabel}>CONFIRMED</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>{TOTAL_PLANES - correctGuesses.length}/{TOTAL_PLANES}</Text>
+              <Text style={styles.statLabel}>REMAINING</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>{pct}%</Text>
+              <Text style={styles.statLabel}>COMPLETE</Text>
+            </View>
+          </View>
+
+          {/* Progress bar */}
+          <View style={styles.progressTrack}>
+            <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
+            <View style={styles.progressTicks}>
+              {[25, 50, 75].map(t => (
+                <View key={t} style={[styles.progressTick, { left: `${t}%` }]} />
+              ))}
+            </View>
+          </View>
+          <View style={styles.progressLabels}>
+            <Text style={styles.progressLabel}>0</Text>
+            <Text style={styles.progressLabel}>25%</Text>
+            <Text style={styles.progressLabel}>50%</Text>
+            <Text style={styles.progressLabel}>75%</Text>
+            <Text style={styles.progressLabel}>{TOTAL_PLANES}</Text>
+          </View>
         </View>
 
-        {/* Sort bar */}
-        {sortedItems.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.sortBar}
-            contentContainerStyle={styles.sortBarContent}
-          >
-            {SORT_OPTIONS.map(opt => {
-              const active = sortKey === opt.key;
-              return (
-                <TouchableOpacity
-                  key={opt.key}
-                  style={[styles.sortChip, active && styles.sortChipActive]}
-                  onPress={() => this.setState({ sortKey: opt.key })}
-                >
-                  <MaterialCommunityIcons
-                    name={opt.icon}
-                    size={15}
-                    color={active ? '#fff' : '#ca8f0f'}
-                  />
-                  <Text style={[styles.sortChipText, active && styles.sortChipTextActive]}>
-                    {opt.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        )}
-
-        {/* Grid */}
+        {/* ── Grid with sort bar as header ── */}
         {sortedItems.length > 0 ? (
           <FlatList
             data={sortedItems}
             keyExtractor={(item, index) => `${item.DEXid}-${index}`}
+            ListHeaderComponent={
+              <View style={styles.sortBar}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.sortBarContent}
+                >
+                  {SORT_OPTIONS.map(opt => {
+                    const active = sortKey === opt.key;
+                    return (
+                      <TouchableOpacity
+                        key={opt.key}
+                        style={[styles.sortChip, active && styles.sortChipActive]}
+                        onPress={() => this.setState({ sortKey: opt.key })}
+                      >
+                        <MaterialCommunityIcons name={opt.icon} size={14} color={active ? '#ca8f0f' : '#aaa'} />
+                        <Text style={[styles.sortChipText, active && styles.sortChipTextActive]}>
+                          {opt.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            }
             renderItem={({ item }) => (
               <View style={styles.cardWrapper}>
                 <Card
@@ -217,61 +270,101 @@ export default class Dex extends Component {
               </View>
             )}
             numColumns={2}
-            scrollEnabled={false}
-            contentContainerStyle={styles.flatListContent}
+            contentContainerStyle={styles.grid}
+            showsVerticalScrollIndicator={false}
           />
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { fontSize: Math.max(13, screenWidth * 0.040) }]}>
-              No items guessed yet. Go guess some items!
+            <MaterialCommunityIcons name="file-hidden" size={56} color="#2a2a3a" />
+            <Text style={styles.emptyTitle}>NO RECORDS</Text>
+            <View style={styles.emptyDivider} />
+            <Text style={styles.emptySubtitle}>
+              Identify aircraft on the radar{'\n'}to populate this dex
             </Text>
           </View>
         )}
-      </ScrollView>
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0a0a0f',
   },
-  headerContainer: {
-    backgroundColor: '#ca8f0f',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontWeight: 'bold',
-    color: '#fff',
-    letterSpacing: 3,
-  },
-  headerSubtitle: {
-    color: '#fff',
-    marginTop: 6,
-  },
-  clearButton: {
-    marginTop: 14,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    paddingHorizontal: 22,
-    paddingVertical: 9,
-    borderRadius: 20,
-  },
-  clearButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  sortBar: {
-    backgroundColor: '#fff',
+
+  // HUD
+  hud: {
+    backgroundColor: '#0d0d14',
+    paddingTop: 52,
+    paddingHorizontal: 18,
+    paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#e8e8e8',
+    borderBottomColor: '#1e1e2e',
+  },
+  hudTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  hudTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  hudTitle: { color: '#ca8f0f', fontSize: 13, fontWeight: '900', letterSpacing: 3 },
+  purgeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderWidth: 1,
+    borderColor: '#f4433644',
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  purgeBtnText: { color: '#f44336', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
+
+  // Stats
+  statsRow: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#1e1e2e',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  statBox: { flex: 1, alignItems: 'center', paddingVertical: 10, backgroundColor: '#0a0a0f' },
+  statDivider: { width: 1, backgroundColor: '#1e1e2e' },
+  statValue: { color: '#ca8f0f', fontSize: 20, fontWeight: '900', letterSpacing: 1 },
+  statLabel: { color: '#333', fontSize: 8, letterSpacing: 2, marginTop: 2, fontWeight: '700' },
+
+  // Progress bar
+  progressTrack: {
+    height: 4,
+    backgroundColor: '#1e1e2e',
+    borderRadius: 2,
+    overflow: 'hidden',
+    position: 'relative',
+    marginBottom: 6,
+  },
+  progressFill: { height: '100%', backgroundColor: '#ca8f0f', borderRadius: 2 },
+  progressTicks: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  progressTick: { position: 'absolute', width: 1, height: '100%', backgroundColor: '#0a0a0f' },
+  progressLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  progressLabel: { color: '#333', fontSize: 8, letterSpacing: 1, fontWeight: '600' },
+
+  // Sort bar
+  sortBar: {
+    backgroundColor: '#0d0d14',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1e1e2e',
   },
   sortBarContent: {
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 8,
     gap: 8,
     flexDirection: 'row',
   },
@@ -279,44 +372,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#ca8f0f',
-    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: '#3a3a4a',
+    backgroundColor: '#16161f',
   },
   sortChipActive: {
-    backgroundColor: '#ca8f0f',
     borderColor: '#ca8f0f',
+    backgroundColor: '#ca8f0f22',
   },
-  sortChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#ca8f0f',
-  },
-  sortChipTextActive: {
-    color: '#fff',
-  },
-  flatListContent: {
-    paddingHorizontal: 8,
-    paddingTop: 12,
-    paddingBottom: 20,
-  },
-  cardWrapper: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  sortChipText: { fontSize: 10, fontWeight: '800', letterSpacing: 1.5, color: '#aaa' },
+  sortChipTextActive: { color: '#ca8f0f' },
+
+  // Grid
+  grid: { paddingHorizontal: 8, paddingTop: 12, paddingBottom: 30 },
+  cardWrapper: { flex: 1, alignItems: 'center' },
+
+  // Empty
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 30,
+    justifyContent: 'center',
+    paddingBottom: 80,
   },
-  emptyText: {
-    color: '#999',
+  emptyTitle: {
+    color: '#2a2a3a',
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: 5,
+    marginTop: 20,
+  },
+  emptyDivider: {
+    width: 30,
+    height: 2,
+    backgroundColor: '#ca8f0f44',
+    marginVertical: 12,
+  },
+  emptySubtitle: {
+    color: '#333',
+    fontSize: 12,
+    letterSpacing: 1,
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 20,
   },
 });
