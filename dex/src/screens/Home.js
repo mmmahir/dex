@@ -1,10 +1,9 @@
-import React, { Component, useEffect } from 'react';
+import React, { Component } from 'react';
 import {
   View, Text, StyleSheet, Dimensions, TouchableOpacity,
   ScrollView, Image, TextInput, Animated, Easing
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ScreenCapture from 'expo-screen-capture';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import data1 from '../data/t1.json';
 import data4 from '../data/t4.json';
@@ -12,7 +11,7 @@ import data5 from '../data/t5.json';
 import data3 from '../data/t3.json';
 import data2 from '../data/t2.json';
 
-const AUTO_PLANE_INTERVAL = 20000;
+const AUTO_PLANE_INTERVAL = 2100000;
 
 const getMetrics = () => {
   const { width, height } = Dimensions.get('window');
@@ -364,12 +363,6 @@ class HomeClass extends Component {
 }
 
 export default function Home(props) {
-  useEffect(() => {
-    ScreenCapture.preventScreenCaptureAsync();
-    const unsubscribeFocus = props.navigation?.addListener('focus', () => { ScreenCapture.preventScreenCaptureAsync(); });
-    const unsubscribeBlur = props.navigation?.addListener('blur', () => { ScreenCapture.allowScreenCaptureAsync(); });
-    return () => { unsubscribeFocus?.(); unsubscribeBlur?.(); ScreenCapture.allowScreenCaptureAsync(); };
-  }, [props.navigation]);
   return <HomeClass {...props} />;
 }
 

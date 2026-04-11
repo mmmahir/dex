@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Home from '../screens/Home';
 import Dex from '../screens/Dex';
-import Collection from '../screens/Collection';
+//import Collection from '../screens/Collection';
 
 const Tab = createBottomTabNavigator();
 

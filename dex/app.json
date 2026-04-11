@@ -2,7 +2,7 @@
   "expo": {
     "name": "Jet Dex",
     "slug": "dex",
-    "version": "1.0.0",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,19 +20,22 @@
       }
     },
     "android": {
+      "permissions": [],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.mmmahir.dex"
+      "package": "com.mmmahir.dex",
+      "versionCode": 17
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-asset",
-      "expo-sqlite"
+      "expo-sqlite",
+      "./removePhoneStatePermission.js"
     ],
     "extra": {
       "eas": {

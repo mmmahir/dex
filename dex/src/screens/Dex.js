@@ -97,6 +97,7 @@ export default class Dex extends Component {
 
   getGuessedItems = (guesses) => {
     const allData = [...this.state.planes, ...this.state.planes4, ...this.state.planes5, ...this.state.planes3, ...this.state.planes2];
+    // Attach the original guess array index so we can delete by exact position
     const items = guesses.map((guess, index) => {
       let item;
       if (guess.DEXid) {
@@ -113,20 +114,33 @@ export default class Dex extends Component {
     const { guessedItems, sortKey } = this.state;
     const items = [...guessedItems];
     switch (sortKey) {
-      case 'newest':        return items.sort((a, b) => b._guessIndex - a._guessIndex);
-      case 'oldest':        return items.sort((a, b) => a._guessIndex - b._guessIndex);
-      case 'rarity':        return items.sort((a, b) => getTier(a) - getTier(b));
-      case 'rarity_reverse':return items.sort((a, b) => getTier(b) - getTier(a));
-      case 'name':          return items.sort((a, b) => a.name.localeCompare(b.name));
-      default:              return items;
+      case 'newest':         return items.sort((a, b) => b._guessIndex - a._guessIndex);
+      case 'oldest':         return items.sort((a, b) => a._guessIndex - b._guessIndex);
+      case 'rarity':         return items.sort((a, b) => getTier(a) - getTier(b));
+      case 'rarity_reverse': return items.sort((a, b) => getTier(b) - getTier(a));
+      case 'name':           return items.sort((a, b) => a.name.localeCompare(b.name));
+      default:               return items;
     }
   };
 
-  deleteItem = async (DEXid) => {
+  // Delete exactly ONE entry by its position in the correctGuesses array (_guessIndex)
+  deleteItem = async (DEXid, guessIndex) => {
     try {
       const saved = await AsyncStorage.getItem('correctGuesses');
       const currentGuesses = saved ? JSON.parse(saved) : [];
-      const updated = currentGuesses.filter(g => g.DEXid !== DEXid);
+
+      let updated;
+      if (guessIndex !== undefined && currentGuesses[guessIndex]?.DEXid === DEXid) {
+        // Remove by exact index — safest, handles duplicates correctly
+        updated = currentGuesses.filter((_, i) => i !== guessIndex);
+      } else {
+        // Fallback: remove only the FIRST matching DEXid
+        const firstMatch = currentGuesses.findIndex(g => g.DEXid === DEXid);
+        updated = firstMatch !== -1
+          ? currentGuesses.filter((_, i) => i !== firstMatch)
+          : currentGuesses;
+      }
+
       await AsyncStorage.setItem('correctGuesses', JSON.stringify(updated));
       this.setState({ correctGuesses: updated });
       this.getGuessedItems(updated);
@@ -193,17 +207,17 @@ export default class Dex extends Component {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statValue}>{correctGuesses.length}</Text>
-              <Text style={styles.statLabel}>CONFIRMED</Text>
+              <Text style={styles.statLabel}>TOTAL</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>{TOTAL_PLANES - correctGuesses.length}/{TOTAL_PLANES}</Text>
-              <Text style={styles.statLabel}>REMAINING</Text>
+              <Text style={styles.statValue}>{new Set(correctGuesses.map(g => g.DEXid)).size}/{TOTAL_PLANES}</Text>
+              <Text style={styles.statLabel}>UNIQUE</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
               <Text style={styles.statValue}>{pct}%</Text>
-              <Text style={styles.statLabel}>COMPLETE</Text>
+              <Text style={styles.statLabel}>PROGRESS</Text>
             </View>
           </View>
 
@@ -229,7 +243,7 @@ export default class Dex extends Component {
         {sortedItems.length > 0 ? (
           <FlatList
             data={sortedItems}
-            keyExtractor={(item, index) => `${item.DEXid}-${index}`}
+            keyExtractor={(item, index) => `${item.DEXid}-${item._guessIndex}-${index}`}
             ListHeaderComponent={
               <View style={styles.sortBar}>
                 <ScrollView
@@ -265,7 +279,8 @@ export default class Dex extends Component {
                   image={item.image}
                   DEXid={item.DEXid}
                   tier={item.tier}
-                  onDelete={this.deleteItem}
+                  guessIndex={item._guessIndex}
+                  onDelete={(DEXid) => this.deleteItem(DEXid, item._guessIndex)}
                 />
               </View>
             )}
@@ -293,8 +308,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0a0a0f',
   },
-
-  // HUD
   hud: {
     backgroundColor: '#0d0d14',
     paddingTop: 52,
@@ -322,8 +335,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   purgeBtnText: { color: '#f44336', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
-
-  // Stats
   statsRow: {
     flexDirection: 'row',
     borderWidth: 1,
@@ -336,8 +347,6 @@ const styles = StyleSheet.create({
   statDivider: { width: 1, backgroundColor: '#1e1e2e' },
   statValue: { color: '#ca8f0f', fontSize: 20, fontWeight: '900', letterSpacing: 1 },
   statLabel: { color: '#333', fontSize: 8, letterSpacing: 2, marginTop: 2, fontWeight: '700' },
-
-  // Progress bar
   progressTrack: {
     height: 4,
     backgroundColor: '#1e1e2e',
@@ -355,8 +364,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   progressLabel: { color: '#333', fontSize: 8, letterSpacing: 1, fontWeight: '600' },
-
-  // Sort bar
   sortBar: {
     backgroundColor: '#0d0d14',
     borderBottomWidth: 1,
@@ -385,12 +392,8 @@ const styles = StyleSheet.create({
   },
   sortChipText: { fontSize: 10, fontWeight: '800', letterSpacing: 1.5, color: '#aaa' },
   sortChipTextActive: { color: '#ca8f0f' },
-
-  // Grid
   grid: { paddingHorizontal: 8, paddingTop: 12, paddingBottom: 30 },
   cardWrapper: { flex: 1, alignItems: 'center' },
-
-  // Empty
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
