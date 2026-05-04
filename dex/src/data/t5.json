@@ -180,5 +180,44 @@
         "guess3": "He 112",
         "DEXid": "#5014",
         "tier": 5
+    },
+    {
+        "id": 15,
+        "name": "P-26A",
+        "description": "10% more health aginst german planes",
+        "attack": 125,
+        "defense": 145,
+        "image": "https://i.pinimg.com/736x/ec/14/e2/ec14e2f1a784d3e70e2ef51fb9c8b83c.jpg",
+        "guess1": "P-26 Peashooter",
+        "guess2": "P-26",
+        "guess3": "P-26",
+        "DEXid": "#5015",
+        "tier": 5
+    },
+    {
+        "id": 16,
+        "name": "P-26B",
+        "description": "10% more health aginst german planes",
+        "attack": 130,
+        "defense": 145,
+        "image": "https://i.pinimg.com/736x/98/d9/b2/98d9b26bb9e029ea911bb8ebc76dafcf.jpg",
+        "guess1": "P-26",
+        "guess2": "P-26B",
+        "guess3": "P 26",
+        "DEXid": "#5016",
+        "tier": 5
+    },
+    {
+        "id": 16,
+        "name": "P-26B",
+        "description": "10% more health aginst german planes",
+        "attack": 130,
+        "defense": 145,
+        "image": "https://i.pinimg.com/736x/98/d9/b2/98d9b26bb9e029ea911bb8ebc76dafcf.jpg",
+        "guess1": "P-26",
+        "guess2": "P-26B",
+        "guess3": "P 26",
+        "DEXid": "#5016",
+        "tier": 5
     }
 ]

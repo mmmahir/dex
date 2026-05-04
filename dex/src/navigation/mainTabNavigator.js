@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Home from '../screens/Home';
 import Dex from '../screens/Dex';
+import ConsentGate from '../components/Consentgate';
 //import Collection from '../screens/Collection';
 
 const Tab = createBottomTabNavigator();
@@ -44,7 +45,8 @@ const TabIcon = ({ name, focused }) => {
 const MainTabNavigator = () => {
   const m = getMetrics();
   return (
-    <Tab.Navigator
+    <ConsentGate>
+      <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
@@ -71,6 +73,7 @@ const MainTabNavigator = () => {
         }}
       />
     </Tab.Navigator>
+    </ConsentGate>
   );
 };
 

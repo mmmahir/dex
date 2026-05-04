@@ -76,7 +76,7 @@ export default class Dex extends Component {
         const guesses = JSON.parse(saved);
         this.setState({ correctGuesses: guesses });
         this.getGuessedItems(guesses);
-        this.animateProgress(guesses.length);
+        this.animateProgress(new Set(guesses.map(g => g.DEXid)).size);
       } else {
         this.animateProgress(0);
       }
@@ -144,7 +144,7 @@ export default class Dex extends Component {
       await AsyncStorage.setItem('correctGuesses', JSON.stringify(updated));
       this.setState({ correctGuesses: updated });
       this.getGuessedItems(updated);
-      this.animateProgress(updated.length);
+      this.animateProgress(new Set(updated.map(g => g.DEXid)).size);
     } catch (error) {
       console.error('Error deleting item:', error);
     }
@@ -180,7 +180,8 @@ export default class Dex extends Component {
     const { correctGuesses, sortKey } = this.state;
     const { screenWidth } = getMetrics();
     const sortedItems = this.getSortedItems();
-    const pct = Math.round((correctGuesses.length / TOTAL_PLANES) * 100);
+    const uniqueCount = new Set(correctGuesses.map(g => g.DEXid)).size;
+    const pct = Math.round((uniqueCount / TOTAL_PLANES) * 100);
 
     const progressWidth = this.progressAnim.interpolate({
       inputRange: [0, 1],
