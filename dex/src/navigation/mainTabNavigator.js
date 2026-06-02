@@ -4,8 +4,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Home from '../screens/Home';
 import Dex from '../screens/Dex';
-import ConsentGate from '../components/Consentgate';
-//import Collection from '../screens/Collection';
+import Trade from '../screens/TradeIn';
+import ConsentGate from '../components/ConsentGate';
+import Collection from '../screens/Collection';
 
 const Tab = createBottomTabNavigator();
 
@@ -72,6 +73,15 @@ const MainTabNavigator = () => {
           tabBarIcon: ({ focused }) => <TabIcon name="book-open-variant" focused={focused} />,
         }}
       />
+      <Tab.Screen
+        name="TRADE IN"
+        component={Trade}
+        options={{
+          tabBarLabel: 'TRADE IN',
+          tabBarIcon: ({ focused }) => <TabIcon name="swap-horizontal-bold" focused={focused} />,
+        }}
+      />
+
     </Tab.Navigator>
     </ConsentGate>
   );

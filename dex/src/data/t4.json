@@ -89,5 +89,70 @@
         "guess3": "Hayabusa",
         "DEXid": "#4007",
         "tier": 4
+    },
+    {
+        "id": 8,
+        "name": "F4U-1A",
+        "description": "Deals 20% more damage to japanese aircraft",
+        "attack": 260,
+        "defense": 230,
+        "image": "https://i.pinimg.com/736x/e9/fc/4c/e9fc4c724248a925b60a6a8753b850f7.jpg",
+        "guess1": "F4U-1A",
+        "guess2": "F4U",
+        "guess3": "F-4",
+        "DEXid": "#4008",
+        "tier": 4
+    },
+    {
+        "id": 9,
+        "name": "F4U-4",
+        "description": "Deals 20% more damage to japanese aircraft",
+        "attack": 260,
+        "defense": 230,
+        "image": "https://i.pinimg.com/1200x/8d/07/bb/8d07bb551d5b1b9331d0148e53fcad18.jpg",
+        "guess1": "F4U-4",
+        "guess2": "F4U",
+        "guess3": "F-4",
+        "DEXid": "#4009",
+        "tier": 4
+    },
+    {
+        "id": 10,
+        "name": "F6F-3",
+        "description": "Deals 20% more damage to japanese aircraft",
+        "attack": 200,
+        "defense": 250,
+        "image": "https://i.pinimg.com/1200x/12/6f/d6/126fd68559fae236cfdcded29b069a19.jpg",
+        "guess1": "F6F-3",
+        "guess2": "F6F",
+        "guess3": "F-6",
+        "DEXid": "#4010",
+        "tier": 4
+    },
+    {
+        "id": 11,
+        "name": "Su-5",
+        "description": "Deals 10% more damage to german aircraft",
+        "attack": 200,
+        "defense": 250,
+        "image": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiBON9rGV-AnC8DPSwWXh9EE0quJ8ebKVw4SpawzyvwxxcaS4FKwunWnn4mGSrvo54dFPGGw4KjKbCaEZb-stP2kpmQCuvrtsNBCd_x_LkplNJZJcCmp3rNADaCx2-Kd9zRoNCHPFUPIThY/s1600/S5+1.jpg",
+        "guess1": "Su-5",
+        "guess2": "Su5",
+        "guess3": "Su 5",
+        "DEXid": "#4011",
+        "tier": 4
+    },
+    {
+        "id": 12,
+        "name": "Su-7",
+        "description": "Deals 10% more damage to german aircraft",
+        "attack": 200,
+        "defense": 250,
+        "image": "https://www.valka.cz/attachments/3588/su7-1.jpg",
+        "guess1": "Su-7",
+        "guess2": "Su7",
+        "guess3": "Su 7",
+        "DEXid": "#4012",
+        "tier": 4
     }
 ]

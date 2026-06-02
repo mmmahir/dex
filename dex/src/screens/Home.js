@@ -1,17 +1,22 @@
 import React, { Component } from 'react';
 import {
   View, Text, StyleSheet, Dimensions, TouchableOpacity,
-  ScrollView, Image, TextInput, Animated, Easing
+  ScrollView, Image, TextInput, Animated, Easing, Modal, Pressable
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { usePreventScreenCapture, preventScreenCaptureAsync, allowScreenCaptureAsync } from 'expo-screen-capture';
 import data1 from '../data/t1.json';
 import data4 from '../data/t4.json';
 import data5 from '../data/t5.json';
 import data3 from '../data/t3.json';
 import data2 from '../data/t2.json';
 
-const AUTO_PLANE_INTERVAL = 21000;
+const AUTO_PLANE_INTERVAL = 2100000;
+
+
+const APP_VERSION = '1.2.0';
+
 
 const getMetrics = () => {
   const { width, height } = Dimensions.get('window');
@@ -47,12 +52,14 @@ class HomeClass extends Component {
       isCorrect: false,
       feedbackMessage: '',
       waitingForNext: false,
+      showUpdateBanner: false,
     };
     this.intervalId = null;
     this.pulseAnim = new Animated.Value(1);
     this.fadeAnim = new Animated.Value(0);
     this.slideAnim = new Animated.Value(40);
     this.scanAnim = new Animated.Value(0);
+    this.bannerAnim = new Animated.Value(0);
   }
 
   componentDidMount() {
@@ -64,6 +71,7 @@ class HomeClass extends Component {
     this.startAutoTimer();
     this.startPulse();
     this.startScan();
+    this.checkVersion();
     this.focusListener = this.props.navigation?.addListener('focus', () => {
       this.loadCorrectGuesses();
     });
@@ -171,6 +179,28 @@ class HomeClass extends Component {
     }
   };
 
+  checkVersion = async () => {
+    try {
+      const seen = await AsyncStorage.getItem('lastSeenVersion');
+      if (seen !== APP_VERSION) {
+        this.setState({ showUpdateBanner: true });
+        Animated.spring(this.bannerAnim, {
+          toValue: 1, useNativeDriver: true,
+          tension: 70, friction: 10,
+        }).start();
+      }
+    } catch (e) {}
+  };
+
+  dismissBanner = async () => {
+    Animated.timing(this.bannerAnim, {
+      toValue: 0, duration: 180, useNativeDriver: true,
+    }).start(async () => {
+      this.setState({ showUpdateBanner: false });
+      try { await AsyncStorage.setItem('lastSeenVersion', APP_VERSION); } catch (e) {}
+    });
+  };
+
   generateSingle = () => {
     const sources = this.state.sources || [];
     if (!sources.length) return this.setState({ selectedItem: null });
@@ -204,7 +234,7 @@ class HomeClass extends Component {
   };
 
   render() {
-    const { selectedItem, userGuess, isCorrect, feedbackMessage, waitingForNext, correctGuesses } = this.state;
+    const { selectedItem, userGuess, isCorrect, feedbackMessage, waitingForNext, correctGuesses, showUpdateBanner } = this.state;
     const { screenWidth, screenHeight } = getMetrics();
     const tier = selectedItem?.tier || 5;
     const tierColor = TIER_COLORS[tier] || '#ca8f0f';
@@ -213,8 +243,45 @@ class HomeClass extends Component {
 
     const scanTranslate = this.scanAnim.interpolate({ inputRange: [0, 1], outputRange: [-imgHeight, imgHeight] });
 
+    const bannerTranslate = undefined; // unused, kept for safety
+
     return (
       <View style={styles.root}>
+
+        {/* ── Update popup ── */}
+        <Modal
+          visible={showUpdateBanner}
+          transparent
+          animationType="fade"
+          statusBarTranslucent
+          onRequestClose={this.dismissBanner}
+        >
+          <Pressable style={styles.modalBackdrop} onPress={this.dismissBanner}>
+            <Animated.View
+              style={[styles.updateModal, { transform: [{ scale: this.bannerAnim.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }], opacity: this.bannerAnim }]}
+            >
+              <Pressable onPress={e => e.stopPropagation()}>
+                {/* Gold top bar */}
+                <View style={styles.updateModalBar} />
+
+                {/* Icon */}
+                <View style={styles.updateModalIconWrap}>
+                  <MaterialCommunityIcons name="arrow-up-circle" size={36} color="#ca8f0f" />
+                </View>
+
+                {/* Text */}
+                <Text style={styles.updateModalTitle}>NEW UPDATE!</Text>
+                <View style={styles.updateModalDivider} />
+                <Text style={styles.updateModalVersion}>v{APP_VERSION}</Text>
+
+                {/* Dismiss button */}
+                <TouchableOpacity style={styles.updateModalBtn} onPress={this.dismissBanner}>
+                  <Text style={styles.updateModalBtnText}>ACKNOWLEDGE</Text>
+                </TouchableOpacity>
+              </Pressable>
+            </Animated.View>
+          </Pressable>
+        </Modal>
 
         {/* ── Top HUD bar ── */}
         <View style={styles.hud}>
@@ -363,6 +430,23 @@ class HomeClass extends Component {
 }
 
 export default function Home(props) {
+  React.useEffect(() => {
+    const tag = 'home-screen';
+    const unsubFocus = props.navigation.addListener('focus', () => {
+      preventScreenCaptureAsync(tag);
+    });
+    const unsubBlur = props.navigation.addListener('blur', () => {
+      allowScreenCaptureAsync(tag);
+    });
+    // Lock immediately if already focused on mount
+    preventScreenCaptureAsync(tag);
+    return () => {
+      allowScreenCaptureAsync(tag);
+      unsubFocus();
+      unsubBlur();
+    };
+  }, []);
+
   return <HomeClass {...props} />;
 }
 
@@ -370,6 +454,75 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#0a0a0f',
+  },
+
+  // Update popup modal
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  updateModal: {
+    width: 280,
+    backgroundColor: '#0d0d14',
+    borderWidth: 1,
+    borderColor: '#ca8f0f44',
+    borderRadius: 6,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  updateModalBar: {
+    width: '100%',
+    height: 3,
+    backgroundColor: '#ca8f0f',
+  },
+  updateModalIconWrap: {
+    marginTop: 28,
+    marginBottom: 14,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#ca8f0f11',
+    borderWidth: 1,
+    borderColor: '#ca8f0f33',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  updateModalTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '900',
+    letterSpacing: 4,
+    textAlign: 'center',
+  },
+  updateModalDivider: {
+    width: 32,
+    height: 2,
+    backgroundColor: '#ca8f0f',
+    marginVertical: 12,
+    alignSelf: 'center',
+  },
+  updateModalVersion: {
+    color: '#ca8f0f',
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 28,
+  },
+  updateModalBtn: {
+    marginBottom: 20,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    backgroundColor: '#ca8f0f',
+    borderRadius: 4,
+  },
+  updateModalBtnText: {
+    color: '#0a0a0f',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 2,
   },
 
   // HUD bar

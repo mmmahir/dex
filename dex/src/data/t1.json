@@ -63,5 +63,18 @@
         "guess3": "su-30",
         "DEXid": "#1005",
         "tier": 1
+    },
+    {
+        "id": 6,
+        "name": "Eurofighter Typhoon",
+        "description": "Gets a 30% damage buff against chinese flankers",
+        "attack": 900,
+        "defense": 860,
+        "image": "https://i.pinimg.com/1200x/c5/03/5c/c5035c95abb2f5edf7d47f7c047121e1.jpg",
+        "guess1": "Eurofighter Typhoon",
+        "guess2": "Typhoon",
+        "guess3": "EF",
+        "DEXid": "#1006",
+        "tier": 1
     }
 ]

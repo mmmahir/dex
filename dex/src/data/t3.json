@@ -50,5 +50,44 @@
         "guess3": "Do-335",
         "DEXid": "#3004",
         "tier": 3
+    },
+    {
+        "id": 5,
+        "name": "Su-9",
+        "description": "Gets 20% more health if there is a german jet on the team",
+        "attack": 450,
+        "defense": 400,
+        "image": "https://tvd.im/uploads/posts/2021/04/sukhoi-su-9-su-11-su-13-1946_7.jpg",
+        "guess1": "Su-9",
+        "guess2": "Su9",
+        "guess3": "Su 9",
+        "DEXid": "#3005",
+        "tier": 3
+    },
+    {
+        "id": 6,
+        "name": "Su-11 (1947)",
+        "description": "Gets 20% more health if there is a german jet on the team",
+        "attack": 450,
+        "defense": 530,
+        "image": "https://preview.redd.it/sukhoi-su-11-fishpot-c-speedier-more-guns-v0-qbe6u1insj331.jpg?width=640&crop=smart&auto=webp&s=736ab674e0097988ee8e45474fff275b9fb150f1",
+        "guess1": "Su-11",
+        "guess2": "Su11",
+        "guess3": "Su 11",
+        "DEXid": "#3006",
+        "tier": 3
+    },
+    {
+        "id": 7,
+        "name": "Su-11 (1946)",
+        "description": "Gets 20% more health if there is a german jet on the team",
+        "attack": 450,
+        "defense": 530,
+        "image": "https://i.redd.it/ws055h4j1ft91.jpg",
+        "guess1": "Su-11",
+        "guess2": "Su11",
+        "guess3": "Su 11",
+        "DEXid": "#3006",
+        "tier": 7
     }
 ]

@@ -63,5 +63,57 @@
         "guess3": "su 24",
         "DEXid": "#2005",
         "tier": 2
+    },
+    {
+        "id": 6,
+        "name": "su-15 TM",
+        "description": "Deals 30% extra damage to american aircraft",
+        "attack": 630,
+        "defense": 700,
+        "image": "https://i.pinimg.com/1200x/b0/ed/f5/b0edf5ddd2cca3d2fcb2af7a5aa93c02.jpg",
+        "guess1": "su-15 TM",
+        "guess2": "su-15",
+        "guess3": "su 15",
+        "DEXid": "#2006",
+        "tier": 2
+    },
+    {
+        "id": 7,
+        "name": "su-17",
+        "description": "Deals 30% extra damage to american aircraft",
+        "attack": 630,
+        "defense": 700,
+        "image": "https://nationalinterest.org/wp-content/uploads/2021/07/Sukhoi_Su-22M4_Czech_Republic_-_Air_Force_cropped-1.jpg",
+        "guess1": "su-17 TM",
+        "guess2": "su-17",
+        "guess3": "su 17",
+        "DEXid": "#2007",
+        "tier": 2
+    },
+    {
+        "id": 8,
+        "name": "J-22A",
+        "description": "Deals 30% extra damage to american aircraft",
+        "attack": 630,
+        "defense": 700,
+        "image": "https://i.pinimg.com/1200x/55/3a/c1/553ac1fdcacebfa6041d58193168968b.jpg",
+        "guess1": "J-22",
+        "guess2": "J-22A",
+        "guess3": "J22",
+        "DEXid": "#2008",
+        "tier": 2
+    },
+    {
+        "id": 9,
+        "name": "J-22B",
+        "description": "Deals 30% extra damage to american aircraft",
+        "attack": 630,
+        "defense": 700,
+        "image": "https://i.pinimg.com/1200x/00/a1/05/00a105be54a5c104819a606ea1d30ee3.jpg",
+        "guess1": "J-22",
+        "guess2": "J-22B",
+        "guess3": "J22",
+        "DEXid": "#2009",
+        "tier": 2
     }
 ]
